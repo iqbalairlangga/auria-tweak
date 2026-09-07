@@ -1,0 +1,57 @@
+name: Build & Release Auria Module
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up zip
+        run: sudo apt-get update && sudo apt-get install -y zip
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(grep "^version=" module.prop | cut -d= -f2)
+          VERSION_CODE=$(grep "^versionCode=" module.prop | cut -d= -f2)
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "TAG=v${VERSION_CODE}" >> $GITHUB_OUTPUT
+
+      - name: Run build script
+        run: bash build_auria.sh
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.TAG }}
+          name: "Auria Tweak ${{ steps.version.outputs.VERSION }}"
+          body: |
+            ## Auria Tweak ${{ steps.version.outputs.VERSION }}
+
+            **Fitur:**
+            - 🔥 Disable Thermal (MediaTek & Snapdragon)
+            - 🔋 Optimasi Charging
+            - 📱 Optimasi Layar
+            - 🎨 Optimasi Rendering
+
+            **Dukungan:**
+            - MediaTek Helio G10 - G200
+            - Snapdragon semua series
+
+            **Cara pakai:** Flash via Magisk / KernelSU / APatch
+          files: |
+            auria_tweak-*.zip
+          draft: false
+          prerelease: false

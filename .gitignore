@@ -3,3 +3,13 @@
 
 # Ada Library Information
 *.ali
+
+# Build artifacts
+*.zip
+build/
+
+# Editor/temp
+*.tmp
+*.log
+.DS_Store
+Thumbs.db

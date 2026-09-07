@@ -1,0 +1,7 @@
+# Force LF line endings for Android shell scripts and module files
+*.sh text eol=lf
+module.prop text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+* text=auto
