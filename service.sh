@@ -1,19 +1,23 @@
 #!/system/bin/sh
-# Auria Tweak - boot service (late_start)
-# Prepare environment then delegate to the engine.
+# Auria Tweak - boot service (late_start service mode)
+# Anti-bootloop reset + initial KPJ sanity, then run engine detached.
 
 MODDIR=${0%/*}
-
-# User may tune config on-device; source from module dir.
 . "$MODDIR/common/helpers.sh"
 . "$MODDIR/common/config.sh"
 . "$MODDIR/common/engine.sh"
 
-# Wait for the framework so props/settings/thermal are touchable.
+# Wait for framework so props/settings/thermal are available.
 until [ "$(getprop sys.boot_completed)" = "1" ]; do
-    sleep 5
+    sleep 3
 done
 
-apply_tweaks &
+# Boot completed = reboot was safe. Reset anti-bootloop counter.
+echo "BOOTCOUNT=0" > "$MODDIR/count.sh" 2>/dev/null
 
+# Clear stale single-instance lock.
+rm -f /dev/.auria_tweak_single 2>/dev/null
+
+# Run engine; keeps system responsive even if an IO node is stuffed.
+apply_tweaks &
 exit 0

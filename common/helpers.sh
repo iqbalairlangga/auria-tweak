@@ -2,31 +2,42 @@
 # Auria Tweak - shared helpers (POSIX sh)
 
 AURIA_LOG="/data/adb/auria_tweak.log"
-AURIA_VER="4.0"
+AURIA_VER="5.0"
 
 a_log() {
     [ "$AURIA_LOG_ENABLE" = "1" ] || return 0
     echo "[$(date '+%m-%d %H:%M:%S')] $1" >> "$AURIA_LOG" 2>/dev/null
 }
 
-# Write value to a single node if writable.
+# Plain write to a node if it exists and is writable.
 a_write() {
-    [ -w "$2" ] && echo "$1" > "$2" 2>/dev/null
+    [ -e "$2" ] || return 1
+    [ -w "$2" ] || return 1
+    echo "$1" > "$2" 2>/dev/null
 }
 
-# Write value to the first writable node among candidates.
+# Write then chmod-lock (444) so userspace cannot revert the tunable.
+# On an immutable/media files it stays applied across runtime.
+a_lock() {
+    [ -e "$2" ] || return 1
+    [ -r "$2" ] || return 1
+    chmod 644 "$2" 2>/dev/null
+    echo "$1" > "$2" 2>/dev/null && chmod 444 "$2" 2>/dev/null
+}
+
+# Write to the first applicable node among several candidates.
 a_write_any() {
     local val="$1" p
     shift
     for p in "$@"; do
-        if [ -w "$p" ]; then
-            echo "$val" > "$p" 2>/dev/null && return 0
-        fi
+        [ -e "$p" ] || continue
+        [ -w "$p" ] || continue
+        echo "$val" > "$p" 2>/dev/null && return 0
     done
     return 1
 }
 
-# Set a sysctl value if the key exists and differs.
+# sysctl setter that skips unchanged values.
 a_sysctl() {
     local key="$1" val="$2" cur
     cur=$(cat "/proc/sys/$key" 2>/dev/null) || return 1
@@ -34,46 +45,61 @@ a_sysctl() {
     echo "$val" > "/proc/sys/$key" 2>/dev/null
 }
 
-# Set a property only if value is non-empty.
+# property setter that ignores empty values.
 a_setprop() {
     [ -z "$2" ] && return 1
     setprop "$1" "$2" 2>/dev/null
 }
 
-# Detect SoC family -> AURIA_SOC (mediatek|qualcomm|other).
+# First value of available_frequencies list (highest first).
+a_max_freq() {
+    [ -r "$1" ] || return 1
+    awk '{print $1}' "$1" 2>/dev/null
+}
+
+# Last value of available_frequencies list (lowest).
+a_min_freq() {
+    [ -r "$1" ] || return 1
+    awk '{for(i=1;i<=NF;i++) v=$i} END{print v}' "$1" 2>/dev/null
+}
+
+# SoC family detection -> AURIA_SOC (mediatek|qualcomm|other).
+# Modeled after Raco: getprop battery + sysfs fallback, robust across ROMs.
 detect_soc() {
-    local hw bd
+    local hw bd gpu
     hw=$(getprop ro.board.platform 2>/dev/null)
     bd=$(getprop ro.boot.hardware 2>/dev/null)
     case "$hw" in
-        mt*) AURIA_SOC=mediatek ;;
-        sm[0-9]*|sdm[0-9]*|msm[0-9]*|kona|lito|bengal|lahaina|taro|kalama|pineapple)
-            AURIA_SOC=qualcomm ;;
-        *)
-            case "$bd" in
-                mt*)   AURIA_SOC=mediatek ;;
-                qcom*) AURIA_SOC=qualcomm ;;
-                *)     AURIA_SOC=other ;;
-            esac
-            ;;
+        mt*)                              AURIA_SOC=mediatek ;;
+        sm[0-9]*|sdm[0-9]*|msm[0-9]*|kona|lito|bengal|lahaina|taro|kalama|pineapple|parrot)
+                                          AURIA_SOC=qualcomm ;;
+        *)                                AURIA_SOC=other ;;
     esac
+    [ "$AURIA_SOC" = "other" ] && {
+        case "$bd" in
+            mt*)                          AURIA_SOC=mediatek ;;
+            qcom*)                        AURIA_SOC=qualcomm ;;
+        esac
+    }
+    # sysfs-based last resort (both projects trust sysfs)
+    [ "$AURIA_SOC" = "other" ] && {
+        [ -d /sys/kernel/ged/hal ] && AURIA_SOC=mediatek
+        [ -d /sys/class/kgsl/kgsl-3d0/devfreq ] && AURIA_SOC=qualcomm
+    }
 }
 
-# Prefer $1 if available, else pick the first governor present.
-set_best_governor() {
-    local want="${1:-performance}" cpu gov found
+# Pick $1 as governor when available, otherwise fall through candidates.
+set_governor() {
+    local want="${1:-performance}" cpu dir gov cand
     for cpu in /sys/devices/system/cpu/cpu*; do
         dir="$cpu/cpufreq"
         [ -f "$dir/scaling_governor" ] || continue
         gov=""
-        if [ -f "$dir/scaling_available_governors" ] && \
-            grep -qw "$want" "$dir/scaling_available_governors" 2>/dev/null; then
+        if grep -qw "$want" "$dir/scaling_available_governors" 2>/dev/null; then
             gov="$want"
-        elif [ -f "$dir/scaling_available_governors" ]; then
+        else
             for cand in performance schedutil ondemand; do
-                if grep -qw "$cand" "$dir/scaling_available_governors" 2>/dev/null; then
-                    gov="$cand"; break
-                fi
+                grep -qw "$cand" "$dir/scaling_available_governors" 2>/dev/null && { gov="$cand"; break; }
             done
         fi
         [ -n "$gov" ] && echo "$gov" > "$dir/scaling_governor" 2>/dev/null

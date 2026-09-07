@@ -1,9 +1,10 @@
-# Auria Tweak - build.prop overlay (applied as system props)
-# Only set long-lived, safe values; runtime props are in engine.sh.
+# Auria Tweak - persistent system props (safe & value-stable).
+# Runtime-only props are applied by engine.sh after boot.
 
-# Rendering
+# Rendering / compositor
 debug.composition.type=gpu
 debug.hwui.renderer=skiavk
-
-# Smoothness
 persist.sys.jank_detect_interval=10
+
+# Input smoothness (from Project Raco / AZenith lineage)
+ro.max.fling_velocity=10000

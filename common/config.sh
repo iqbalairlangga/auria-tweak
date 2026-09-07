@@ -1,23 +1,37 @@
 #!/system/bin/sh
 # Auria Tweak - user configuration
-# Edit values and re-install for defaults, or edit on-device and reboot.
+# Edit here after flash: /data/adb/modules/auria_tweak/common/config.sh
+# Values apply on next reboot.
 
-AURIA_LOG_ENABLE=1          # 1 = write /data/adb/auria_tweak.log
+AURIA_LOG_ENABLE=1
 
-# --- Thermal policy ---
-AURIA_THERMAL=1             # 1 = soften throttling, 2 = disable, 0 = stock
+# ---------- Profiles ----------
+# balanced | performance | powersave
+AURIA_PROFILE=balanced
 
-# --- Battery & charging ---
-AURIA_CHARGING=1            # 1 = apply charging tweaks
-AURIA_CHARGE_CURRENT=2000000  # uA fast-charge target (0 = leave stock)
+# ---------- (1) Thermal policy ----------
+# 0=stock  1=soften throttling  2=aggressive (kill thermal engine)
+AURIA_THERMAL=1
 
-# --- Display tuning ---
-AURIA_DISPLAY=1             # 1 = apply display tweaks
-AURIA_REFRESH=0             # HZ target (0/60/90/120); 0 = leave stock
-AURIA_ANIMATION=1           # 1 = reduce animation scales
+# ---------- (2) Battery & charging ----------
+AURIA_CHARGING=1
+AURIA_CHARGE_CURRENT=2000000   # uA fast-charge target (0 = leave stock)
 
-# --- Rendering & CPU/GPU ---
-AURIA_RENDER=1              # 1 = GPU + renderer tweaks
-AURIA_CPU_GOVERNOR=performance # scalable_ini preferred governor
-AURIA_IO=1                  # 1 = IO scheduler & read-ahead
-AURIA_VM=1                  # 1 = VM balancing (swappiness etc.)
+# ---------- (3) Display / SurfaceFlinger ----------
+AURIA_DISPLAY=1
+# SF latency draw (dynamic phase offsets). Advanced, default off.
+AURIA_SF_LATENCY=0
+AURIA_REFRESH=0                # 0/60/90/120
+AURIA_ANIMATION=1
+
+# ---------- (4) Rendering / GPU / CPU ----------
+AURIA_RENDER=1
+AURIA_CPU_GOVERNOR=performance # preferred scaling governor
+AURIA_MTK_FPSGO=0              # MTK fpsgo/GED heavy boost (default off)
+AURIA_MTK_PPM=1                # MTK PPM policy parser
+AURIA_WALT=0                   # MTK walt governor tuning (default off)
+
+# ---------- (5) Misc system hygiene ----------
+AURIA_IO=1
+AURIA_VM=1
+AURIA_KILL_LOGD=0              # stop logd/statsd etc on boot (default off)

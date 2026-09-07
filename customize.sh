@@ -1,7 +1,7 @@
 #!/system/bin/sh
 # Auria Tweak - installer
-# SoC detection + friendly status. No files copied here: Magisk/MKSU
-# place the module tree automatically; tweaks run from service.sh.
+# SoC detection (robust, Raco-style getprop battery + sysfs fallback)
+# plus an initial count.sh so anti-bootloop has a baseline.
 
 MODDIR=${0%/*}
 . "$MODDIR/common/helpers.sh"
@@ -15,16 +15,21 @@ ui_print "=============================="
 
 detect_soc
 
+# Ensure anti-bootloop baseline (0 so first boot never trips).
+echo "BOOTCOUNT=0" > "$MODDIR/count.sh"
+
 ui_print "  SoC family : $AURIA_SOC"
 ui_print "  Platform   : $(getprop ro.board.platform 2>/dev/null)"
+ui_print "  Profile    : $(grep '^AURIA_PROFILE' "$MODDIR/common/config.sh" | cut -d= -f2)"
 ui_print ""
 ui_print "  Features:"
-ui_print "   - Thermal policy"
+ui_print "   - Thermal policy (0/1/2)"
 ui_print "   - Battery & charging"
-ui_print "   - Display tuning"
+ui_print "   - Display / SF tuning"
 ui_print "   - Render (GPU/CPU) tuning"
-ui_print "   - IO & VM balancing"
+ui_print "   - IO, VM, misc hygiene"
+ui_print "   - Anti-bootloop self-heal"
 ui_print ""
-ui_print "  Install complete. Reboot to apply."
-
+ui_print "  Config: /data/adb/modules/auria_tweak/common/config.sh"
+ui_print "  Reboot after install to apply."
 exit 0
