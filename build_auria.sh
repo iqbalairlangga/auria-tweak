@@ -1,44 +1,34 @@
 #!/bin/sh
-# Auria Tweak - Build script
-# Creates the flashable Magisk/KernelSU module zip
+# Auria Tweak - build script
+# Produces a flashable module zip (module.prop drives the version).
+set -e
 
-# Get version from module.prop
-MOD_VERSION=$(grep "^version=" module.prop | cut -d= -f2)
 AURIA_MODULE_ID="auria_tweak"
+MAX_SIZE_MB=10
 
-echo "Building Auria Tweak v${MOD_VERSION}..."
+mod_version=$(grep "^version=" module.prop | cut -d= -f2 | tr -d '[:space:]')
+out_zip="${AURIA_MODULE_ID}-${mod_version}.zip"
 
-# Create temp build directory
-BUILD_DIR="build_tmp"
-rm -rf "$BUILD_DIR"
-mkdir -p "$BUILD_DIR/common"
+echo "Building Auria Tweak ${mod_version} ..."
 
-# Copy core module files
-cp module.prop "$BUILD_DIR/"
-cp customize.sh "$BUILD_DIR/"
-cp service.sh "$BUILD_DIR/"
-cp post-fs-data.sh "$BUILD_DIR/"
+# --- stage files ---
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+cp module.prop system.prop customize.sh service.sh post-fs-data.sh "$tmp/"
+mkdir -p "$tmp/common"
+cp common/config.sh common/engine.sh common/helpers.sh "$tmp/common/"
 
-# Copy common scripts
-cp common/util_functions.sh "$BUILD_DIR/common/"
-cp common/auria_tweak.sh "$BUILD_DIR/common/"
+# --- pack ---
+(cd "$tmp" && zip -qr "../$out_zip" . -x '.*')
 
-# Copy system overlay if it exists
-if [ -d "system" ]; then
-    cp -r system "$BUILD_DIR/"
+# --- enforce our published size budget ---
+size_kb=$(du -k "$out_zip" | cut -f1)
+echo "Created $out_zip (${size_kb} KB)"
+
+if [ "$size_kb" -gt $((MAX_SIZE_MB * 1024)) ]; then
+    echo "Error: $out_zip exceeds ${MAX_SIZE_MB}MB budget" >&2
+    rm -f "$out_zip"
+    exit 1
 fi
 
-# Create README inside module (optional)
-echo "Auria Tweak v${MOD_VERSION}" > "$BUILD_DIR/README"
-
-# Create the zip
-AURIA_ZIP="${AURIA_MODULE_ID}-v${MOD_VERSION}.zip"
-cd "$BUILD_DIR"
-zip -r "../$AURIA_ZIP" . -x ".*" >/dev/null
-cd ..
-
-# Cleanup
-rm -rf "$BUILD_DIR"
-
-echo "Done! Created: $AURIA_ZIP"
-ls -lh "$AURIA_ZIP"
+ls -lh "$out_zip"

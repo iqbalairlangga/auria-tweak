@@ -1,6 +1,6 @@
 id=auria_tweak
 name=Auria Tweak
-version=v3.7
-versionCode=37
+version=v4.0
+versionCode=40
 author=AuriaDev
-description=Performance & battery optimizer for MediaTek Helio (G10-G200) and Snapdragon devices. Disable thermal throttling, optimize charging, display, and GPU/CPU rendering.
+description=Real tweak engine for MediaTek Helio (G10-G200) and Snapdragon. Thermal policy, battery & charging, display, and GPU/CPU rendering tunables. Small, efficient, under 10MB.
