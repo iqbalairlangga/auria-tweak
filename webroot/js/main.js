@@ -1,25 +1,62 @@
 // Auria Tweak - WebUI Logic
 'use strict';
 
-/* ================= Bridge (KernelSU / MMRL) ================= */
+/* ================= Bridge support =================
+ * KernelSU / MMRL ........ window.kuband (callback-style exec)
+ * ReSukiSU / SukiSU/SukiSU-Next lineage .. window.ksu (WebUI-Next API:
+ *   sync exec(cmd) -> stdout, or exec(cmd, "cbName") -> cb(exitCode,out,err))
+ */
 const MOD_PATH = '/data/adb/modules/auria_tweak';
 const CFG  = MOD_PATH + '/config.sh';
 const CLIC = MOD_PATH + '/cli.sh';
 
+const BRIDGES = [
+  { kind: 'kuband',  get: () => window.kuband },
+  { kind: 'kuband',  get: () => (window.MMRLWebUI && window.MMRLWebUI.kuband) || null },
+  { kind: 'ksu',     get: () => window.ksu },
+];
+
 function api() {
-  return window.kuband || (window.MMRLWebUI && window.MMRLWebUI.kuband) || null;
+  for (const b of BRIDGES) { const o = b.get(); if (o) return { kind: b.kind, handle: o }; }
+  return null;
 }
 
 function exec(cmd) {
   return new Promise((resolve) => {
-    const b = api();
-    if (!b) return resolve({ errno: -1, stdout: '', stderr: 'no-bridge' });
+    const a = api();
+    if (!a) return resolve({ errno: -1, stdout: '', stderr: 'no-bridge' });
+    const resolveResult = (errno, stdout, stderr) =>
+      resolve({ errno: errno || 0, stdout: stdout || '', stderr: stderr || '' });
+
+    if (a.kind === 'ksu') {
+      // WebUI-Next: async via a globally-registered callback name.
+      try {
+        const cbName = '__auria_exec_' + (Math.random() * 1e9 | 0);
+        window[cbName] = (code, out, err) => { delete window[cbName]; resolveResult(code, out, err); };
+        a.handle.exec(cmd, cbName);
+        return;
+      } catch (e) {
+        // Fallback: sync exec returning stdout string.
+        try {
+          const r = a.handle.exec(cmd);
+          if (typeof r === 'string') return resolveResult(0, r, '');
+        } catch (e2) { /* fall through */ }
+        return resolve({ errno: -1, stdout: '', stderr: String(e) });
+      }
+    }
+
+    // kuband: callback-style.
     try {
-      b.exec(cmd, (code, stdout, stderr) => resolve({ errno: code, stdout: stdout || '', stderr: stderr || '' }));
+      a.handle.exec(cmd, (code, stdout, stderr) => resolveResult(code, stdout, stderr));
     } catch (e) {
-      const r = b.exec(cmd);
-      if (r && typeof r.then === 'function') r.then(x => resolve({ errno: 0, stdout: typeof x === 'string' ? x : (x?.stdout || x?.result || ''), stderr: '' })).catch(() => resolve({ errno: -1, stdout: '', stderr: String(e) }));
-      else resolve({ errno: -1, stdout: '', stderr: String(e) });
+      // Some kuband builds return a Promise.
+      const r = a.handle.exec(cmd);
+      if (r && typeof r.then === 'function') {
+        r.then(x => resolve({ errno: 0, stdout: typeof x === 'string' ? x : (x?.stdout || x?.result || ''), stderr: '' }))
+         .catch(() => resolve({ errno: -1, stdout: '', stderr: String(e) }));
+      } else {
+        resolve({ errno: -1, stdout: '', stderr: String(e) });
+      }
     }
   });
 }
@@ -51,7 +88,12 @@ const toast = (msg, kind = '') => {
 /* ================= Parse config ================= */
 async function loadConfig() {
   const r = await exec('cat ' + CFG);
-  if (r.stderr) { toast('Tidak dapat membaca config', 'err'); return; }
+  if (r.stderr) {
+    // No read permission (flat path) or missing bridge: keep defaults, still render.
+    const b = api();
+    toast(b ? 'Tidak dapat membaca config' : 'WebUI: aktifkan di manager', b ? 'err' : '');
+    return renderAll();
+  }
   const txt = r.stdout;
   for (const line of txt.split('\n')) {
     if (!line || line.startsWith('#')) continue;
@@ -138,7 +180,7 @@ async function saveAndReboot() {
 (async function init() {
   if (!api()) {
     document.body.classList.add('busy');
-    toast('WebUI: aktifkan di KernelSU Manager / MMRL', 'err');
+    toast('WebUI: aktifkan di manager (KSU/MMRL/ReSukiSU)', 'err');
   }
   const p = await exec('getprop ro.board.platform');
   const hw = (p.stdout || '').trim();

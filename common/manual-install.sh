@@ -10,7 +10,7 @@
 # Existing config.sh is PRESERVED on update; fresh modules get defaults.
 
 ARCH=$(getprop ro.dalvik.vm.isa.arm)
-AURIA_VER="6.1.4"
+AURIA_VER="6.1.5"
 
 ui_print() { echo "$1"; }
 

@@ -1,4 +1,4 @@
-# Auria Tweak v6.1.4
+# Auria Tweak v6.1.5
 
 **Clean & stable tuning engine** untuk MediaTek Helio (G10–G200) dan Snapdragon (semua series).
 Ringan, efisien, dan muat dalam 10MB — file ZIP hasil build hanya ~14KB.
@@ -111,6 +111,7 @@ Auto-build & release via `.github/workflows/release.yml` setiap tag `v*`.
 
 ## Changelog
 
+- **v6.1.5** — **Fix WebUI ReSukiSU**: tambah bridge `window.ksu` (WebUI-Next API, dipakai ReSukiSU/SukiSU lineage). Sebelumnya hanya `window.kuband` (KernelSU/MMRL) → di ReSukiSU tombol WebUI tidak merespons.
 - **v6.1.4** — **Fix deteksi SoC & load config**: file runtime (helpers/config/engine/cli) dipindah dari `common/` ke root modul karena metainstall ResukiSU/KernelSU meratakan `common/*` ke root → `service.sh` gagal source helpers/config. Update-binary urutan perbaikan, customize.sh probe path berlapis.
 - **v6.1.3** — pindah `install.sh` keluar root zip (ResukiSU salah deteksi MMT-Ex).
 - **v6.1.2** — fix path helpers.sh untuk ResukiSU/KernelSU.
