@@ -32,4 +32,5 @@ ui_print "   - Anti-bootloop self-heal"
 ui_print ""
 ui_print "  Config: /data/adb/modules/auria_tweak/common/config.sh"
 ui_print "  Reboot after install to apply."
+ui_print "  Uninstall: kelola via manager (restore otomatis ke stock)."
 exit 0

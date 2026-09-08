@@ -103,6 +103,7 @@ untuk menerapkan tanpa reboot. Butuh KernelSU Manager untuk bridge shell
 auria_tweak/       → instalasi otomatis ke module tree
 ├── module.prop      metadata
 ├── customize.sh     installer: deteksi SoC robust + baseline anti-bootloop
+├── uninstall.sh     uninstaller: restore thermal/logger ke stock + cleanup runtime
 ├── service.sh       boot service: reset counter, lalu jalankan engine
 ├── post-fs-data.sh  guard single-instance + anti-bootloop counter
 ├── system.prop      prop overlay (aman/persisten)
@@ -129,6 +130,8 @@ Auto-build & release via `.github/workflows/release.yml` setiap tag `v*`.
 
 ## Changelog
 
+- **v5.5** — tambah `uninstall.sh`: restore thermal/logger ke stock + bersihkan
+  runtime (log, snapshot policy, config backup); installer juga sudah ada (`customize.sh`).
 - **v5.4** — Thermal kill diperkuat metode **Kreapic-Disable-Thermal**: stop
   semua service thermal HAL/engine (18 service, dedup), kunci `init.svc.*=stopped`,
   knob `msm_thermal core_control`, & restore service saat kembali ke Stock.

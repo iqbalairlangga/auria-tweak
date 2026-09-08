@@ -14,7 +14,7 @@ echo "Building Auria Tweak ${mod_version} ..."
 # --- stage files ---
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-cp module.prop system.prop customize.sh service.sh post-fs-data.sh "$tmp/"
+cp module.prop system.prop customize.sh service.sh post-fs-data.sh uninstall.sh "$tmp/"
 mkdir -p "$tmp/common" "$tmp/webroot"
 cp common/config.sh common/engine.sh common/helpers.sh common/cli.sh "$tmp/common/"
 cp webroot/index.html "$tmp/webroot/"
