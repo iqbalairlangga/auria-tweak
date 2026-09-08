@@ -67,6 +67,29 @@ AURIA_KILL_LOGD=0          # default off
 AURIA_LOG_ENABLE=1
 ```
 
+## Install & Uninstall
+
+**Install (disarankan):** flash ZIP `auria_tweak-vX.X.zip` via Magisk /
+KernelSU / MMRL lalu reboot (memakai `customize.sh`).
+
+**Install manual (terminal/ADB):** tanpa manager, jalankan sebagai root:
+
+```bash
+adb push auria_tweak-vX.X.zip /sdcard/Download/
+adb shell "su -c 'unzip -o /sdcard/Download/auria_tweak-vX.X.zip -d /sdcard/Download/auria_tweak'"
+adb shell "su -c 'sh /sdcard/Download/auria_tweak/install.sh'"
+```
+
+Update dengan cara yang sama; config user (`config.sh`) otomatis dibackup
+(`config.sh.bak`) dan dipertahankan.
+
+**Uninstall:** hapus module via manager (menjalankan `uninstall.sh`, restore
+thermal/logger ke stock + bersihkan runtime), atau:
+
+```bash
+adb shell "su -c 'sh /data/adb/modules/auria_tweak/uninstall.sh'; ls /data/adb/modules"
+```
+
 ## Stabilitas
 
 - **Anti-bootloop:** dua boot gagal → modul auto-disable + petunjuk di description
@@ -102,7 +125,8 @@ untuk menerapkan tanpa reboot. Butuh KernelSU Manager untuk bridge shell
 ```
 auria_tweak/       → instalasi otomatis ke module tree
 ├── module.prop      metadata
-├── customize.sh     installer: deteksi SoC robust + baseline anti-bootloop
+├── customize.sh     installer zip (manager): deteksi SoC + baseline anti-bootloop
+├── install.sh       installer mandiri (terminal/ADB), pertahankan config user
 ├── uninstall.sh     uninstaller: restore thermal/logger ke stock + cleanup runtime
 ├── service.sh       boot service: reset counter, lalu jalankan engine
 ├── post-fs-data.sh  guard single-instance + anti-bootloop counter
@@ -130,6 +154,8 @@ Auto-build & release via `.github/workflows/release.yml` setiap tag `v*`.
 
 ## Changelog
 
+- **v5.6** — tambah `install.sh`: installer mandiri untuk terminal/ADB tanpa
+  manager; backup `config.sh` user saat update dan pertahankan pengaturannya.
 - **v5.5** — tambah `uninstall.sh`: restore thermal/logger ke stock + bersihkan
   runtime (log, snapshot policy, config backup); installer juga sudah ada (`customize.sh`).
 - **v5.4** — Thermal kill diperkuat metode **Kreapic-Disable-Thermal**: stop
