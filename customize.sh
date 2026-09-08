@@ -1,12 +1,15 @@
 #!/system/bin/sh
-# Auria Tweak - installer (sourced by META-INF update-binary)
+# Auria Tweak - installer (sourced by META-INF update-binary or run standalone)
 # SoC detection + anti-bootloop baseline.
 
-# ui_print is provided by Magisk's util_functions.sh
-# MODPATH is set by update-binary
-# Helpers are extracted to same dir as customize.sh
+# ui_print is provided by Magisk's util_functions.sh when sourced by update-binary
+# MODPATH is set by update-binary; fallback to $MODDIR for standalone
 
+# Source helpers from same directory as this script
 . "$(dirname "$0")/helpers.sh"
+
+# Use MODPATH if set by update-binary, otherwise use MODDIR
+MODPATH=${MODPATH:-${0%/*}}
 
 detect_root_mgr
 case "$AURIA_ROOT" in

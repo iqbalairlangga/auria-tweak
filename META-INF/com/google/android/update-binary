@@ -55,10 +55,11 @@ $BOOTMODE && boot_actions || recovery_actions
 # Preparation
 ##########################################################################################
 
-# Extract common files
-unzip -oj "$ZIPFILE" module.prop customize.sh uninstall.sh 'common/*' -d $TMPDIR >&2
+# Extract ALL module files to temp directory
+ui_print "- Extracting module files..."
+unzip -o "$ZIPFILE" -d $TMPDIR >&2
 
-[ ! -f $TMPDIR/customize.sh ] && abort "! Unable to extract zip file!"
+[ ! -f $TMPDIR/module.prop ] && abort "! Unable to extract zip file!"
 
 # Load install script
 . $TMPDIR/customize.sh
@@ -91,18 +92,20 @@ ui_print "******************************"
 rm -rf $MODPATH 2>/dev/null
 mkdir -p $MODPATH
 
-on_install
+# Copy ALL extracted files to module directory
+ui_print "- Installing module files..."
+cp -af $TMPDIR/* $MODPATH/ 2>/dev/null
 
-# Copy webroot for KernelSU/APatch WebUI
-ui_print "- Copying WebUI..."
+# Ensure webroot exists for KernelSU/APatch WebUI
 mkdir -p $MODPATH/webroot
-unzip -oj "$ZIPFILE" 'webroot/*' -d $MODPATH/webroot >&2
+[ -d $TMPDIR/webroot ] && cp -af $TMPDIR/webroot/* $MODPATH/webroot/ 2>/dev/null
 
-# Copy system overlay if exists
-if [ -d "$TMPDIR/system" ]; then
-    ui_print "- Copying system overlay..."
-    cp -af $TMPDIR/system/* $MODPATH/system/ 2>/dev/null
-fi
+# Ensure system overlay exists
+[ -d $TMPDIR/system ] && cp -af $TMPDIR/system/* $MODPATH/system/ 2>/dev/null
+
+# Ensure common exists
+mkdir -p $MODPATH/common
+[ -d $TMPDIR/common ] && cp -af $TMPDIR/common/* $MODPATH/common/ 2>/dev/null
 
 # Custom uninstaller
 [ -f $TMPDIR/uninstall.sh ] && cp -af $TMPDIR/uninstall.sh $MODPATH/uninstall.sh
@@ -115,7 +118,7 @@ else
 fi
 
 # prop files
-$PROPFILE && cp -af $TMPDIR/system.prop $MODPATH/system.prop
+$PROPFILE && cp -af $TMPDIR/system.prop $MODPATH/system.prop 2>/dev/null
 
 # Module info
 cp -af $TMPDIR/module.prop $MODPATH/module.prop
@@ -130,10 +133,10 @@ if $BOOTMODE; then
 fi
 
 # post-fs-data mode scripts
-$POSTFSDATA && cp -af $TMPDIR/post-fs-data.sh $MODPATH/post-fs-data.sh
+$POSTFSDATA && cp -af $TMPDIR/post-fs-data.sh $MODPATH/post-fs-data.sh 2>/dev/null
 
 # service mode scripts
-$LATESTARTSERVICE && cp -af $TMPDIR/service.sh $MODPATH/service.sh
+$LATESTARTSERVICE && cp -af $TMPDIR/service.sh $MODPATH/service.sh 2>/dev/null
 
 # Handle replace folders
 for TARGET in $REPLACE; do
