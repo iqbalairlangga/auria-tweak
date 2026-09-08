@@ -3,12 +3,23 @@
 # SoC detection + anti-bootloop baseline.
 
 # ui_print is provided by Magisk's util_functions.sh when sourced by update-binary
-# MODPATH is set by update-binary; fallback to $MODDIR for standalone
+# TMPDIR is set by update-binary; MODPATH is set by update-binary
 
-# Source helpers from same directory as this script
-. "$(dirname "$0")/helpers.sh"
+# Detect root manager first (needs helpers.sh)
+# When sourced by update-binary, helpers.sh is in TMPDIR/common/ (extracted from zip)
+# When run standalone, helpers.sh is in same dir as this script
+HELPER_DIR="${TMPDIR:-${0%/*}}"
+# Check common/ subdirectory first (update-binary extraction), then current dir
+if [ -f "$HELPER_DIR/common/helpers.sh" ]; then
+    . "$HELPER_DIR/common/helpers.sh"
+elif [ -f "$HELPER_DIR/helpers.sh" ]; then
+    . "$HELPER_DIR/helpers.sh"
+else
+    echo "Error: helpers.sh not found"
+    exit 1
+fi
 
-# Use MODPATH if set by update-binary, otherwise use MODDIR
+# Use MODPATH if set by update-binary, otherwise use MODDIR for standalone
 MODPATH=${MODPATH:-${0%/*}}
 
 detect_root_mgr
