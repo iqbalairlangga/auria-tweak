@@ -3,8 +3,8 @@
 
 /* ================= Bridge (KernelSU / MMRL) ================= */
 const MOD_PATH = '/data/adb/modules/auria_tweak';
-const CFG  = MOD_PATH + '/common/config.sh';
-const CLIC = MOD_PATH + '/common/cli.sh';
+const CFG  = MOD_PATH + '/config.sh';
+const CLIC = MOD_PATH + '/cli.sh';
 
 function api() {
   return window.kuband || (window.MMRLWebUI && window.MMRLWebUI.kuband) || null;

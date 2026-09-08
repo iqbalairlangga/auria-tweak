@@ -23,8 +23,14 @@ if [ "$COUNT" -gt 1 ]; then
 fi
 echo "BOOTCOUNT=1" > "$MODDIR/count.sh"
 
-. "$MODDIR/common/helpers.sh"
-. "$MODDIR/common/config.sh"
+# Runtime files at module root; fallback to common/ if a manager kept that layout.
+if [ -f "$MODDIR/helpers.sh" ]; then
+    . "$MODDIR/helpers.sh"
+    . "$MODDIR/config.sh"
+else
+    . "$MODDIR/common/helpers.sh"
+    . "$MODDIR/common/config.sh"
+fi
 
 # Earliest VM balance while fs is fresh.
 [ "$AURIA_VM" = "1" ] && {

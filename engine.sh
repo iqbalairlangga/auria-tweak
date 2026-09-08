@@ -165,7 +165,6 @@ apply_tweaks() {
 # MTK: PPM & dvfsrc (kept from AZenith - proven stable)
 # ===================================================================
 mtk_ppm_policy() {
-    [ "$AURIA_MTK_PPM" = "1" ] || return 0
     [ -f /proc/ppm/policy_status ] || return 0
     local mode="$1" idx
     local clamp=1

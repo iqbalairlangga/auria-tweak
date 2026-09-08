@@ -18,21 +18,21 @@ if [ -z "$MODPATH" ]; then
     fi
 fi
 
-# --- locate helpers.sh -----------------------------------------------------
-# Magisk: TMPDIR/common/helpers.sh (after update-binary extracts zip)
-# KSU/ResukiSU native: module dir/common/helpers.sh
-HELPER_DIR=""
-for c in "$MODPATH/common" "${TMPDIR}/common" "${0%/*}/common" "$PWD/common"; do
+# --- locate runtime dir ----------------------------------------------------
+# Runtime scripts live at module root (helpers.sh/config.sh/engine.sh/cli.sh).
+# Some managers flatten common/ to root; probe both just in case.
+RUNTIME_DIR=""
+for c in "$MODPATH" "${TMPDIR}" "${0%/*}" "$PWD" "$MODPATH/common"; do
     if [ -f "$c/helpers.sh" ]; then
-        HELPER_DIR="$c"
+        RUNTIME_DIR="$c"
         break
     fi
 done
-if [ -z "$HELPER_DIR" ]; then
+if [ -z "$RUNTIME_DIR" ]; then
     ui_print "Error: helpers.sh tidak ditemukan."
     exit 1
 fi
-. "$HELPER_DIR/helpers.sh"
+. "$RUNTIME_DIR/helpers.sh"
 
 # --- root manager lock (Magisk / KernelSU / APatch only) -------------------
 detect_root_mgr
@@ -56,7 +56,7 @@ echo "BOOTCOUNT=0" > "$MODPATH/count.sh"
 
 ui_print "  SoC family : $AURIA_SOC"
 ui_print "  Platform   : $(getprop ro.board.platform 2>/dev/null)"
-ui_print "  Profile    : $(grep '^AURIA_PROFILE' "$HELPER_DIR/config.sh" | cut -d= -f2)"
+ui_print "  Profile    : $(grep '^AURIA_PROFILE' "$RUNTIME_DIR/config.sh" | cut -d= -f2)"
 ui_print ""
 ui_print "  Features:"
 ui_print "   - Thermal soften (mode 1)"
@@ -66,6 +66,6 @@ ui_print "   - Render (GPU/CPU governor)"
 ui_print "   - IO (mq-deadline) + VM"
 ui_print "   - Anti-bootloop self-heal"
 ui_print ""
-ui_print "  Config: /data/adb/modules/auria_tweak/common/config.sh"
+ui_print "  Config: /data/adb/modules/auria_tweak/config.sh"
 ui_print "  Reboot after install to apply."
 ui_print "  Uninstall: kelola via manager (restore otomatis ke stock)."

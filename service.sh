@@ -3,9 +3,16 @@
 # Anti-bootloop reset + initial sanity, then run engine detached.
 
 MODDIR=${0%/*}
-. "$MODDIR/common/helpers.sh"
-. "$MODDIR/common/config.sh"
-. "$MODDIR/common/engine.sh"
+# Runtime files at module root; fallback to common/ if a manager kept that layout.
+if [ -f "$MODDIR/helpers.sh" ]; then
+    . "$MODDIR/helpers.sh"
+    . "$MODDIR/config.sh"
+    . "$MODDIR/engine.sh"
+else
+    . "$MODDIR/common/helpers.sh"
+    . "$MODDIR/common/config.sh"
+    . "$MODDIR/common/engine.sh"
+fi
 
 # Wait for framework so props/settings/thermal are available.
 until [ "$(getprop sys.boot_completed)" = "1" ]; do

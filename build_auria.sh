@@ -22,18 +22,18 @@ mkdir -p "$tmp/webroot/assets"
 mkdir -p "$tmp/system"
 mkdir -p "$tmp/common"
 
-# Copy root files (install.sh stays under common/ — a root install.sh makes
-# KernelSU/ResukiSU metainstall treat the zip as legacy MMT and run it as the
-# installer instead of customize.sh)
+# Copy root files (runtime files stay at module root — some managers
+# flatten common/, so everything semantic must live here)
 cp module.prop customize.sh service.sh post-fs-data.sh uninstall.sh "$tmp/"
+cp config.sh helpers.sh engine.sh cli.sh "$tmp/"
 cp system.prop "$tmp/system/"
 
 # Copy META-INF
 cp META-INF/com/google/android/update-binary "$tmp/META-INF/com/google/android/"
 cp META-INF/com/google/android/updater-script "$tmp/META-INF/com/google/android/"
 
-# Copy common
-cp common/config.sh common/engine.sh common/helpers.sh common/cli.sh common/install.sh "$tmp/common/"
+# Copy common (only the manual installer lives here)
+cp common/manual-install.sh "$tmp/common/"
 
 # Copy webroot
 cp webroot/index.html "$tmp/webroot/"

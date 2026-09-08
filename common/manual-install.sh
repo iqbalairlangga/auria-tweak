@@ -4,13 +4,13 @@
 # Usable by Magisk, KernelSU, and mmrl alike.
 #
 # Usage:
-#   (as root) sh /path/to/auria_tweak/common/install.sh
-#   adb shell "su -c 'sh /sdcard/Download/auria_tweak/common/install.sh'"
+#   (as root) sh /path/to/auria_tweak/common/manual-install.sh
+#   adb shell "su -c 'sh /sdcard/Download/auria_tweak/common/manual-install.sh'"
 #
 # Existing config.sh is PRESERVED on update; fresh modules get defaults.
 
 ARCH=$(getprop ro.dalvik.vm.isa.arm)
-AURIA_VER="6.1.3"
+AURIA_VER="6.1.4"
 
 ui_print() { echo "$1"; }
 
@@ -56,8 +56,8 @@ ui_print "=============================="
 ui_print "  Root manager: $rmgr (supported)"
 
 # --- backup user config before refresh ---
-if [ -f "$DST/common/config.sh" ]; then
-    cp -f "$DST/common/config.sh" "$DST/common/config.sh.bak" 2>/dev/null
+if [ -f "$DST/config.sh" ]; then
+    cp -f "$DST/config.sh" "$DST/config.sh.bak" 2>/dev/null
     ui_print "  - Config lama disimpan: config.sh.bak"
 fi
 
@@ -87,10 +87,10 @@ soc_detect() {
 
 ui_print "  - SoC        : $(soc_detect)"
 ui_print "  - Platform   : $(getprop ro.board.platform 2>/dev/null)"
-ui_print "  - Profile    : $(grep '^AURIA_PROFILE' "$DST/common/config.sh" 2>/dev/null | cut -d= -f2)"
+ui_print "  - Profile    : $(grep '^AURIA_PROFILE' "$DST/config.sh" 2>/dev/null | cut -d= -f2)"
 ui_print ""
 ui_print "  Installed ke : $DST"
-ui_print "  Config      : $DST/common/config.sh"
+ui_print "  Config      : $DST/config.sh"
 ui_print "  Reboot untuk menerapkan."
 
 exit 0

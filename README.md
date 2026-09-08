@@ -1,4 +1,4 @@
-# Auria Tweak v6.0
+# Auria Tweak v6.1.4
 
 **Clean & stable tuning engine** untuk MediaTek Helio (G10–G200) dan Snapdragon (semua series).
 Ringan, efisien, dan muat dalam 10MB — file ZIP hasil build hanya ~14KB.
@@ -30,13 +30,13 @@ FLASH via **Magisk / KernelSU / APatch**, lalu **reboot**.
 Ubah via WebUI / CLI — **berlaku tanpa reboot** (governor CPU di-switch live).
 
 ```bash
-sh /data/adb/modules/auria_tweak/common/cli.sh performance
+sh /data/adb/modules/auria_tweak/cli.sh performance
 # pilihan: balanced | performance | powersave
 ```
 
 ## Konfigurasi
 
-Edit `/data/adb/modules/auria_tweak/common/config.sh`. Profil berlaku
+Edit `/data/adb/modules/auria_tweak/config.sh`. Profil berlaku
 langsung; flag lain berlaku pada reboot berikutnya:
 
 ```sh
@@ -80,19 +80,22 @@ WebUI butuh KernelSU Manager untuk bridge shell (`window.kuband`); di browser bi
 auria_tweak/
 ├── module.prop        metadata
 ├── customize.sh       installer (manager): deteksi SoC + baseline anti-bootloop
-├── install.sh         installer manual (ADB/terminal), backup config user
-├── uninstall.sh       uninstaller: restore thermal/logger ke stock + cleanup runtime
 ├── service.sh         boot service: reset counter, lalu jalankan engine
 ├── post-fs-data.sh    guard single-instance + anti-bootloop counter
+├── uninstall.sh       uninstaller: restore thermal/logger ke stock + cleanup runtime
 ├── system.prop        prop overlay (aman/persisten)
+├── config.sh          AURIA konfigurasi (12 opsi)
+├── helpers.sh         helper POSIX sh (write/prop/sysctl/SoC/gov/root-detect)
+├── engine.sh          engine per-fitur (thermal→charging→display→render→io/vm)
+├── cli.sh             apply-on-demand (WebUI "Terapkan Sekarang")
 ├── webroot/
 │   └── index.html     WebUI (KernelSU/MMRL bridge)
 └── common/
-    ├── config.sh      AURIA konfigurasi (12 opsi)
-    ├── helpers.sh     helper POSIX sh (write/lock/prop/sysctl/SoC/gov/root-detect)
-    ├── engine.sh      engine per-fitur (thermal→charging→display→render→io/vm)
-    └── cli.sh         apply-on-demand (WebUI "Terapkan Sekarang")
+    └── manual-install.sh  installer manual (ADB/terminal), backup config user
 ```
+
+> File runtime berada di root modul (bukan `common/`) agar kompatibel dengan
+> semua manager — beberapa metainstall (ResukiSU/KernelSU) meratakan `common/`.
 
 ## Build
 
@@ -108,6 +111,10 @@ Auto-build & release via `.github/workflows/release.yml` setiap tag `v*`.
 
 ## Changelog
 
+- **v6.1.4** — **Fix deteksi SoC & load config**: file runtime (helpers/config/engine/cli) dipindah dari `common/` ke root modul karena metainstall ResukiSU/KernelSU meratakan `common/*` ke root → `service.sh` gagal source helpers/config. Update-binary urutan perbaikan, customize.sh probe path berlapis.
+- **v6.1.3** — pindah `install.sh` keluar root zip (ResukiSU salah deteksi MMT-Ex).
+- **v6.1.2** — fix path helpers.sh untuk ResukiSU/KernelSU.
+- **v6.1** — struktur standar Magisk/KSU/APatch (META-INF, webroot terpisah, system/).
 - **v6.0** — **Total cleanup**: hapus FPSGO, WALT, SF latency, thermal kill (18 services), kill logd, sf_color, zeta props berlebih, restore logic kompleks. Simpan hanya tweak stabil & terbukti. Engine ~180 baris (dari 404). Config 12 opsi (dari 38). WebUI bersih.
 - **v5.7** — kunci modul ke Magisk / KernelSU / APatch saja.
 - **v5.6** — tambah `install.sh` installer mandiri.

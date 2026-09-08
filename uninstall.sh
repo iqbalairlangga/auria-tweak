@@ -9,7 +9,7 @@ command -v ui_print >/dev/null 2>&1 || ui_print() { echo "$1"; }
 
 ui_print "- Auria Tweak cleanup..."
 
-. "$MODDIR/common/helpers.sh"
+. "$MODDIR/helpers.sh" 2>/dev/null || . "$MODDIR/common/helpers.sh" 2>/dev/null
 
 # Restore MTK zone policies snapshotted before userspace override.
 if [ -f /data/adb/auria_thermal_policy.bak ]; then
