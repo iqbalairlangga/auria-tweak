@@ -1,0 +1,10 @@
+# Auria Tweak - Magisk module updater script
+# This script is used by Magisk to install the module
+
+# Extract and run customize.sh
+package_extract_dir("META-INF/com/google/android", "/tmp/auria_install");
+set_perm(0, 0, 0755, "/tmp/auria_install/update-binary");
+run_program("/tmp/auria_install/update-binary", "3", "/tmp/auria_install/updater-script");
+
+# The actual installation is handled by update-binary
+# which sources customize.sh and does the installation
