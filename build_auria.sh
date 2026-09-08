@@ -11,18 +11,15 @@ out_zip="${AURIA_MODULE_ID}-${mod_version}.zip"
 
 echo "Building Auria Tweak ${mod_version} ..."
 
-# --- stage files ---
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-cp module.prop system.prop customize.sh install.sh uninstall.sh service.sh post-fs-data.sh "$tmp/"
+cp module.prop system.prop customize.sh service.sh post-fs-data.sh install.sh uninstall.sh "$tmp/"
 mkdir -p "$tmp/common" "$tmp/webroot"
 cp common/config.sh common/engine.sh common/helpers.sh common/cli.sh "$tmp/common/"
 cp webroot/index.html "$tmp/webroot/"
 
-# --- pack ---
 (cd "$tmp" && zip -qr "../$out_zip" . -x '.*')
 
-# --- enforce our published size budget ---
 size_kb=$(du -k "$out_zip" | cut -f1)
 echo "Created $out_zip (${size_kb} KB)"
 

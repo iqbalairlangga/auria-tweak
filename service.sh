@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # Auria Tweak - boot service (late_start service mode)
-# Anti-bootloop reset + initial KPJ sanity, then run engine detached.
+# Anti-bootloop reset + initial sanity, then run engine detached.
 
 MODDIR=${0%/*}
 . "$MODDIR/common/helpers.sh"

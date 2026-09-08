@@ -1,8 +1,6 @@
 #!/system/bin/sh
-# Auria Tweak - CLI entrypoint (dipakai WebUI: "Terapkan" / adb shell)
+# Auria Tweak - CLI entrypoint (WebUI / adb shell)
 # Usage: sh cli.sh [profile]
-#   ash  cli.sh                 -> apply dengan profil dari config
-#   ash  cli.sh performance     -> simpan profil lalu apply langsung
 # Loads config and applies tweaks immediately (no reboot).
 
 MODDIR=${0%/*}

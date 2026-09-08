@@ -15,14 +15,12 @@
   --text:#F8FAFC;
   --muted:#94A3B8;
   --border:#334155;
-  --glass:rgba(30,41,59,.55);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{background:var(--bg);color:var(--text);font-family:'Inter','Segoe UI',system-ui,sans-serif;min-height:100%}
 body{padding-bottom:96px}
 .container{max-width:720px;margin:0 auto;padding:16px}
 
-/* ---- header ---- */
 .hero{display:flex;align-items:center;gap:14px;padding:18px 4px 8px}
 .logo{width:52px;height:52px;border-radius:14px;flex-shrink:0;
   background:linear-gradient(135deg,var(--primary),var(--secondary));
@@ -34,13 +32,11 @@ body{padding-bottom:96px}
   border:1px solid var(--border);color:var(--muted);margin-top:6px}
 .pill b{color:var(--primary)}
 
-/* ---- cards ---- */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-top:14px}
 .card h2{font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:12px;
   display:flex;align-items:center;gap:8px}
 .card h2::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--primary)}
 
-/* ---- profile cards ---- */
 .profiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .profile{border:1px solid var(--border);border-radius:14px;padding:14px 10px;text-align:center;cursor:pointer;
   background:var(--surface2);transition:.15s;position:relative;overflow:hidden}
@@ -53,7 +49,6 @@ body{padding-bottom:96px}
 .profile.badged::after{content:'Rekomendasi';position:absolute;top:6px;right:6px;font-size:8px;
   font-weight:700;color:#03212B;background:var(--secondary);padding:1px 6px;border-radius:99px}
 
-/* ---- toggles ---- */
 .toggle{border:1px solid var(--border);border-radius:12px;padding:12px;margin-top:8px;
   display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surface2)}
 .toggle .info .t{font-size:13px;font-weight:600}
@@ -67,7 +62,6 @@ body{padding-bottom:96px}
 .tag{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:6px;background:rgba(148,163,184,.15);color:var(--muted)}
 .tag.live{background:rgba(6,182,212,.2);color:var(--primary)}
 
-/* ---- segmented ---- */
 .seg{display:flex;gap:8px;margin-top:8px}
 .seg button{flex:1;padding:9px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);
   color:var(--text);font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
@@ -75,9 +69,8 @@ body{padding-bottom:96px}
 select,input[type=number]{width:100%;margin-top:8px;padding:10px;border-radius:10px;
   border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:13px}
 
-/* ---- footer actions ---- */
 .actions{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
-  background:var(--glass);backdrop-filter:blur(12px);border-top:1px solid var(--border)}
+  background:rgba(0,0,0,.8);backdrop-filter:blur(12px);border-top:1px solid var(--border)}
 .actions .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:720px;margin:0 auto}
 .btn{padding:13px;border-radius:12px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:.15s}
 .btn.primary{background:var(--primary);color:#03212B}
@@ -103,7 +96,7 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
     <div>
       <h1>AURIA<span style="color:var(--primary)">TWK</span></h1>
       <p>Tweak engine — MediaTek Helio · Snapdragon</p>
-      <div class="pill">Social: <b id="soc">deteksi...</b></div>
+      <div class="pill">SoC: <b id="soc">deteksi...</b></div>
     </div>
   </div>
 
@@ -131,11 +124,10 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
 
   <div class="card" id="card-thermal">
     <h2>Thermal</h2>
-    <p style="font-size:11px;color:var(--muted);margin:-6px 0 6px">Kill = matikan kernel thermal + stop semua HAL/engine thermal (metode Kreapic)</p>
-    <div class="seg" data-key="AURIA_THERMAL" data-map='{"0":"Stock","1":"Soft","2":"Kill"}'>
+    <p style="font-size:11px;color:var(--muted);margin:-6px 0 6px">0=Stock  1=Soften (recommended)</p>
+    <div class="seg" data-key="AURIA_THERMAL" data-map='{"0":"Stock","1":"Soften"}'>
       <button data-v="0">Stock</button>
-      <button data-v="1">Soft</button>
-      <button data-v="2">Kill</button>
+      <button data-v="1">Soften</button>
     </div>
   </div>
 
@@ -181,49 +173,17 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
       <button class="switch"></button>
     </div>
     <label style="font-size:11px;color:var(--muted);margin-top:10px;display:block">
-      Preferensi CPU governor</label>
+      Preferensi CPU governor (fallback balanced)</label>
     <select id="AURIA_CPU_GOVERNOR">
       <option>performance</option>
       <option>schedutil</option>
       <option>ondemand</option>
       <option>interactive</option>
     </select>
-    <div class="toggle" style="margin-top:10px" data-key="AURIA_MTK_PPM">
-      <div class="info"><div class="t">MTK PPM policy</div>
-        <div class="d">Parser policy_status <span class="tag live">MTK</span></div></div>
-      <button class="switch"></button>
-    </div>
-  </div>
-
-  <div class="card" style="border-color:var(--error)">
-    <h2 style="color:var(--error)">Fitur Lanjutan (risiko)</h2>
-    <p style="font-size:11px;color:var(--muted);margin:-6px 0 10px">Default
-      <b>OFF</b>. ON = diterapkan saat "Terapkan Sekarang"; OFF = dipulihkan ke
-      bawaan (tanpa reboot). Aktifkan hanya bila paham risikonya.</p>
-    <div class="toggle" data-key="AURIA_SF_LATENCY">
-      <div class="info"><div class="t">SF latency</div>
-        <div class="d">Phase-offset lanjutan <span class="tag">risiko</span></div></div>
-      <button class="switch"></button>
-    </div>
-    <div class="toggle" data-key="AURIA_MTK_FPSGO">
-      <div class="info"><div class="t">MTK FPSGO / GED</div>
-        <div class="d">Boost gaming MTK <span class="tag">risiko</span></div></div>
-      <button class="switch"></button>
-    </div>
-    <div class="toggle" data-key="AURIA_WALT">
-      <div class="info"><div class="t">WALT governor</div>
-        <div class="d">Tuning walt MTK <span class="tag">risiko</span></div></div>
-      <button class="switch"></button>
-    </div>
-    <div class="toggle" data-key="AURIA_KILL_LOGD">
-      <div class="info"><div class="t">Kill logger</div>
-        <div class="d">logd/statsd/traced <span class="tag">risiko</span></div></div>
-      <button class="switch"></button>
-    </div>
   </div>
 
   <div class="card">
-    <h2>Sistem &amp; Hygiene</h2>
+    <h2>Sistem & Hygiene</h2>
     <div class="toggle" data-key="AURIA_IO">
       <div class="info"><div class="t">IO scheduler</div>
         <div class="d">mq-deadline + read-ahead 2MB</div></div>
@@ -245,14 +205,11 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
     <h2>Info</h2>
     <div class="status-line">
       <span class="pill">Platform: <b id="plat">…</b></span>
-      <span class="pill">Module: <b>v5.7</b></span>
+      <span class="pill">Module: <b>v6.0</b></span>
     </div>
     <p class="muted">
-      Terinspirasi oleh <code>AZenith</code> (Zexshia/ArchHaven, Apache-2.0),
-      <code>Project Raco</code> (Kanagawa Yamada), dan
-      <code>Kreapic-Disable-Thermal</code> (mahisataruna/AlgorithmIDN) untuk
-      mode Thermal = Kill. Setelah ubah pengaturan, tap
-      <b>Simpan</b> lalu rebot atau <b>Terapkan</b> untuk efek langsung.
+      Clean & stable tweak. Terinspirasi <code>AZenith</code> & <code>Project Raco</code>.
+      Setelah ubah pengaturan, tap <b>Terapkan Sekarang</b> untuk efek langsung.
     </p>
   </div>
 
@@ -261,7 +218,7 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
 <div class="actions">
   <div class="row">
     <button class="btn outline" id="applyBtn">Terapkan Sekarang</button>
-    <button class="btn primary" id="saveBtn">Simpan &amp; Reboot</button>
+    <button class="btn primary" id="saveBtn">Simpan & Reboot</button>
   </div>
 </div>
 
@@ -288,17 +245,11 @@ function exec(cmd) {
     try {
       b.exec(cmd, (code, stdout, stderr) => resolve({ errno: code, stdout: stdout || '', stderr: stderr || '' }));
     } catch (e) {
-      /* kembalian Promise-based */
       const r = b.exec(cmd);
-      if (r && typeof r.then === 'function') r.then(x => resolve(norm(x))).catch(err => resolve({ errno: -1, stdout: '', stderr: String(err) }));
+      if (r && typeof r.then === 'function') r.then(x => resolve({ errno: 0, stdout: typeof x === 'string' ? x : (x?.stdout || x?.result || ''), stderr: '' })).catch(() => resolve({ errno: -1, stdout: '', stderr: String(e) }));
       else resolve({ errno: -1, stdout: '', stderr: String(e) });
     }
   });
-}
-function norm(x) {
-  if (typeof x === 'string') return { errno: 0, stdout: x, stderr: '' };
-  if (typeof x === 'object' && x !== null) return { errno: x.errno ?? 0, stdout: x.stdout ?? x.result ?? '', stderr: x.stderr ?? '' };
-  return { errno: 0, stdout: String(x), stderr: '' };
 }
 
 /* ================= State ================= */
@@ -308,17 +259,12 @@ const DEFAULTS = {
   AURIA_CHARGING: '1',
   AURIA_CHARGE_CURRENT: '2000000',
   AURIA_DISPLAY: '1',
-  AURIA_SF_LATENCY: '0',
   AURIA_REFRESH: '0',
   AURIA_ANIMATION: '1',
   AURIA_RENDER: '1',
   AURIA_CPU_GOVERNOR: 'performance',
-  AURIA_MTK_PPM: '1',
-  AURIA_MTK_FPSGO: '0',
-  AURIA_WALT: '0',
   AURIA_IO: '1',
   AURIA_VM: '1',
-  AURIA_KILL_LOGD: '0',
   AURIA_LOG_ENABLE: '1',
 };
 let cfg = { ...DEFAULTS };
@@ -346,19 +292,16 @@ async function loadConfig() {
 }
 
 function renderAll() {
-  // profile cards
   document.querySelectorAll('.profile').forEach(p => {
     const act = p.dataset.p === cfg.AURIA_PROFILE;
     p.classList.toggle('active', act);
     p.onclick = () => { selectProfile(p.dataset.p); };
   });
-  // switches
   document.querySelectorAll('.toggle').forEach(tg => {
     const k = tg.dataset.key, sw = tg.querySelector('.switch');
     if (k && sw) sw.classList.toggle('on', cfg[k] === '1');
     tg.onclick = (e) => { if (e.target.closest('.toggle') === tg) flip(tg, k); };
   });
-  // segmented
   document.querySelectorAll('.seg').forEach(seg => {
     const k = seg.dataset.key;
     seg.querySelectorAll('button').forEach(b => {
@@ -366,7 +309,6 @@ function renderAll() {
       b.onclick = () => setKey(k, b.dataset.v);
     });
   });
-  // selects / numbers
   const sel = document.getElementById('AURIA_REFRESH');
   if (sel) sel.value = cfg.AURIA_REFRESH;
   const gov = document.getElementById('AURIA_CPU_GOVERNOR');
@@ -378,17 +320,6 @@ function selectProfile(p) { if (cfg.AURIA_PROFILE === p) return; cfg.AURIA_PROFI
 function flip(tg, k) { cfg[k] = cfg[k] === '1' ? '0' : '1'; dirty = true; renderAll(); }
 function setKey(k, v) { cfg[k] = String(v); dirty = true; renderAll(); }
 
-async function applyProfile(p) {
-  // tulis AURIA_PROFILE dulu (persisten), lalu terapkan engine tanpa reboot
-  const r = await sedKey('AURIA_PROFILE', p);
-  toast('Terapkan profil ' + p + '…', 'ok');
-  const a = await exec('sh ' + CLIC + ' "' + p + '" >/dev/null 2>&1 &');
-  setTimeout(() => {
-    const ok = !(r.stderr || a.stderr);
-    toast(ok ? 'Profil ' + p + ' aktif' : 'Gagal menerapkan ' + p, ok ? 'ok' : 'err');
-  }, 800);
-}
-
 /* ================= Save ================= */
 function sedKey(k, v) {
   const esc = String(v).replace(/([&\\|])/g, '\\$1');
@@ -396,11 +327,9 @@ function sedKey(k, v) {
 }
 
 async function saveConfig() {
-  // validation
   cfg.AURIA_CHARGE_CURRENT = String(Math.max(0, parseInt(document.getElementById('AURIA_CHARGE_CURRENT').value || '0', 10)));
   cfg.AURIA_REFRESH = document.getElementById('AURIA_REFRESH').value;
   cfg.AURIA_CPU_GOVERNOR = document.getElementById('AURIA_CPU_GOVERNOR').value;
-  // backup, lalu tulis per-kunci (transaksi aman)
   await exec('cp ' + CFG + ' ' + CFG + '.bak');
   for (const k of Object.keys(DEFAULTS)) {
     const r = await sedKey(k, cfg[k]);
@@ -410,12 +339,23 @@ async function saveConfig() {
   return { errno: 0, stdout: '', stderr: '' };
 }
 
+async function applyProfile(p) {
+  const r = await sedKey('AURIA_PROFILE', p);
+  toast('Terapkan profil ' + p + '…', 'ok');
+  const a = await exec('sh ' + CLIC + ' "' + p + '" >/dev/null 2>&1 &');
+  setTimeout(() => {
+    const ok = !(r.stderr || a.stderr);
+    toast(ok ? 'Profil ' + p + ' aktif' : 'Gagal menerapkan ' + p, ok ? 'ok' : 'err');
+  }, 800);
+}
+
 async function applyNow() {
   await saveConfig();
   toast('Terapkan tweak → ' + cfg.AURIA_PROFILE + '…', 'ok');
   const r = await exec('sh ' + CLIC + ' "' + cfg.AURIA_PROFILE + '" >/dev/null 2>&1 &');
   setTimeout(() => toast('Diterapkan (' + cfg.AURIA_PROFILE + '). Log: /data/adb/auria_tweak.log', r.stderr ? 'err' : 'ok'), 800);
 }
+
 async function saveAndReboot() {
   const r = await saveConfig();
   toast('Config disimpan, reboot…', 'ok');
@@ -428,7 +368,6 @@ async function saveAndReboot() {
     document.body.classList.add('busy');
     toast('WebUI: aktifkan di KernelSU Manager / MMRL', 'err');
   }
-  // deteksi SoC
   const p = await exec('getprop ro.board.platform');
   const hw = (p.stdout || '').trim();
   document.getElementById('soc').textContent = /^mt/i.test(hw) ? 'MediaTek' : (/sm|sdm|msm|kona|lito|bengal|lahaina|taro|kalama/i.test(hw) ? 'Snapdragon' : (hw || 'unk'));
