@@ -2,7 +2,7 @@
 # Auria Tweak - shared helpers (POSIX sh)
 
 AURIA_LOG="/data/adb/auria_tweak.log"
-AURIA_VER="5.0"
+AURIA_VER="5.2"
 
 a_log() {
     [ "$AURIA_LOG_ENABLE" = "1" ] || return 0
@@ -89,19 +89,27 @@ detect_soc() {
 }
 
 # Pick $1 as governor when available, otherwise fall through candidates.
+# Fallback order is profile-aware: never silently grab "performance"
+# when the user asked for powersave.
 set_governor() {
     local want="${1:-performance}" cpu dir gov cand
     for cpu in /sys/devices/system/cpu/cpu*; do
         dir="$cpu/cpufreq"
         [ -f "$dir/scaling_governor" ] || continue
         gov=""
-        if grep -qw "$want" "$dir/scaling_available_governors" 2>/dev/null; then
-            gov="$want"
-        else
-            for cand in performance schedutil ondemand; do
-                grep -qw "$cand" "$dir/scaling_available_governors" 2>/dev/null && { gov="$cand"; break; }
-            done
-        fi
+        grep -qw "$want" "$dir/scaling_available_governors" 2>/dev/null && gov="$want" || {
+            case "$want" in
+                powersave)   for cand in schedutil ondemand interactive; do
+                                 grep -qw "$cand" "$dir/scaling_available_governors" 2>/dev/null && { gov="$cand"; break; }
+                             done ;;
+                performance) for cand in schedutil ondemand interactive; do
+                                 grep -qw "$cand" "$dir/scaling_available_governors" 2>/dev/null && { gov="$cand"; break; }
+                             done ;;
+                *)           for cand in schedutil ondemand interactive; do
+                                 grep -qw "$cand" "$dir/scaling_available_governors" 2>/dev/null && { gov="$cand"; break; }
+                             done ;;
+            esac
+        }
         [ -n "$gov" ] && echo "$gov" > "$dir/scaling_governor" 2>/dev/null
     done
 }

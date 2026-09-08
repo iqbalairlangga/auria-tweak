@@ -72,10 +72,14 @@ Project Raco.
 
 | Kontrol | Efek |
 |---------|------|
-| Profil (Balanced/Performance/Powersave) | set `AURIA_PROFILE` |
+| Ketuk profil (Balanced/Performance/Powersave) | ganti `AURIA_PROFILE` + **terapkan langsung, tanpa reboot** |
 | Toggle per fitur | set flag di `config.sh` |
-| `Terapkan` | tulis config & jalankan engine langsung |
+| `Terapkan Sekarang` | tulis config & jalankan engine langsung dengan profil aktif |
 | `Simpan & Reboot` | tulis config lalu reboot |
+
+Profil diganti tanpa reboot: klik kartu profil → WebUI menulis `AURIA_PROFILE`
+ke `config.sh` lalu memanggil `common/cli.sh <profil>`; engine mengubah governor
+CPU serta policy MTK/PPM/dvfsrc sesuai profil secara perangkat-runtime.
 
 WebUI membaca/menulis `common/config.sh` dan bisa memanggil `common/cli.sh`
 untuk menerapkan tanpa reboot. Butuh KernelSU Manager untuk bridge shell

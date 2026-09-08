@@ -1,9 +1,20 @@
 #!/system/bin/sh
 # Auria Tweak - CLI entrypoint (dipakai WebUI: "Terapkan" / adb shell)
 # Usage: sh cli.sh [profile]
-# Loads config and applies tweaks immediately.
+#   ash  cli.sh                 -> apply dengan profil dari config
+#   ash  cli.sh performance     -> simpan profil lalu apply langsung
+# Loads config and applies tweaks immediately (no reboot).
 
 MODDIR=${0%/*}
+
+if [ -n "$1" ]; then
+    case "$1" in
+        balanced|performance|powersave)
+            sed -i "s/^AURIA_PROFILE=.*/AURIA_PROFILE=$1/" "$MODDIR/config.sh" 2>/dev/null
+            ;;
+    esac
+fi
+
 . "$MODDIR/helpers.sh"
 . "$MODDIR/config.sh"
 . "$MODDIR/engine.sh"

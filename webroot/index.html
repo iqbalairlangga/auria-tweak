@@ -109,6 +109,7 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
 
   <div class="card">
     <h2>Profil Performa</h2>
+    <p style="font-size:11px;color:var(--muted);margin:-6px 0 10px">Ketuk profil untuk langsung aktif (tanpa reboot)</p>
     <div class="profiles" id="profiles">
       <div class="profile" data-p="balanced">
         <div class="icon">⚖️</div>
@@ -249,7 +250,7 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
 
 <div class="actions">
   <div class="row">
-    <button class="btn outline" id="applyBtn">Terapkan</button>
+    <button class="btn outline" id="applyBtn">Terapkan Sekarang</button>
     <button class="btn primary" id="saveBtn">Simpan &amp; Reboot</button>
   </div>
 </div>
@@ -363,9 +364,20 @@ function renderAll() {
   const cur = document.getElementById('AURIA_CHARGE_CURRENT');
   if (cur) { cur.value = cfg.AURIA_CHARGE_CURRENT; document.getElementById('curval').textContent = cfg.AURIA_CHARGE_CURRENT + ' µA'; }
 }
-function selectProfile(p) { if (cfg.AURIA_PROFILE === p) return; cfg.AURIA_PROFILE = p; dirty = true; renderAll(); toast('Profil: ' + p, 'ok'); }
+function selectProfile(p) { if (cfg.AURIA_PROFILE === p) return; cfg.AURIA_PROFILE = p; dirty = true; renderAll(); applyProfile(p); }
 function flip(tg, k) { cfg[k] = cfg[k] === '1' ? '0' : '1'; dirty = true; renderAll(); }
 function setKey(k, v) { cfg[k] = String(v); dirty = true; renderAll(); }
+
+async function applyProfile(p) {
+  // tulis AURIA_PROFILE dulu (persisten), lalu terapkan engine tanpa reboot
+  const r = await sedKey('AURIA_PROFILE', p);
+  toast('Terapkan profil ' + p + '…', 'ok');
+  const a = await exec('sh ' + CLIC + ' "' + p + '" >/dev/null 2>&1 &');
+  setTimeout(() => {
+    const ok = !(r.stderr || a.stderr);
+    toast(ok ? 'Profil ' + p + ' aktif' : 'Gagal menerapkan ' + p, ok ? 'ok' : 'err');
+  }, 800);
+}
 
 /* ================= Save ================= */
 function sedKey(k, v) {
@@ -390,9 +402,9 @@ async function saveConfig() {
 
 async function applyNow() {
   await saveConfig();
-  toast('Terapkan tweak…', 'ok');
-  const r = await exec('sh ' + CLIC + ' >/dev/null 2>&1 &');
-  setTimeout(() => toast('Diterapkan. Log: /data/adb/auria_tweak.log', r.stderr ? 'err' : 'ok'), 700);
+  toast('Terapkan tweak → ' + cfg.AURIA_PROFILE + '…', 'ok');
+  const r = await exec('sh ' + CLIC + ' "' + cfg.AURIA_PROFILE + '" >/dev/null 2>&1 &');
+  setTimeout(() => toast('Diterapkan (' + cfg.AURIA_PROFILE + '). Log: /data/adb/auria_tweak.log', r.stderr ? 'err' : 'ok'), 800);
 }
 async function saveAndReboot() {
   const r = await saveConfig();

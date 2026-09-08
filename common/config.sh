@@ -1,7 +1,8 @@
 #!/system/bin/sh
 # Auria Tweak - user configuration
 # Edit here after flash: /data/adb/modules/auria_tweak/common/config.sh
-# Values apply on next reboot.
+# Profil bisa diganti tanpa reboot via WebUI "Terapkan" / `sh cli.sh <profil>`.
+# Nilai lain berlaku pada boot berikutnya.
 
 AURIA_LOG_ENABLE=1
 

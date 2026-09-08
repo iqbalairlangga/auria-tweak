@@ -169,6 +169,22 @@ set_render_qc() {
     done
 }
 
+# Map an active profile to a preferred CPU governor, applied live.
+# Suppresses an explicit AURIA_CPU_GOVERNOR so switching profiles
+# actually moves the governor (no reboot needed).
+set_cpu_mode() {
+    local mode="$1" gov_override
+    case "$mode" in
+        performance) gov_override="performance" ;;
+        powersave)   gov_override="powersave" ;;
+        balanced)    gov_override="schedutil" ;;
+        *)           return 0 ;;
+    esac
+    AURIA_CPU_GOVERNOR="$gov_override"
+    set_governor "$gov_override"
+    L "cpu mode: ${mode} (gov=${gov_override})"
+}
+
 # MTK: Mali power policy + fpsgo/GED (AZenith), gated by config.
 set_render_mtk() {
     local d
@@ -264,6 +280,9 @@ apply_tweaks() {
     local mode="${1:-$AURIA_PROFILE}"
     detect_soc
     L "v$AURIA_VER start (soc=$AURIA_SOC profile=$mode)"
+    # Governor follows the live profile, overriding the config default,
+    # so switching profiles takes effect without a reboot.
+    set_cpu_mode "$mode"
     set_thermal
     case "$mode:$AURIA_SOC" in
         *:mediatek) mtk_ppm_policy "$mode"; mtk_dvfsrc "$mode" ;;
