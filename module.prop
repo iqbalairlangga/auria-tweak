@@ -1,6 +1,6 @@
 id=auria_tweak
 name=Auria Tweak
-version=v5.0
-versionCode=50
+version=v5.1
+versionCode=51
 author=AuriaDev
-description=High-stability tuning engine for MediaTek Helio (G10-G200) & Snapdragon. Merged from AZenith + Project Raco: thermal policy, charging, display/SF, GPU/CPU render, IO/VM. Anti-bootloop. Under 10MB.
+description=High-stability tuning engine for MediaTek Helio (G10-G200) & Snapdragon. Merged from AZenith + Project Raco with WebUI. Thermal, charging, display/SF, render, IO/VM. Anti-bootloop. Under 10MB.

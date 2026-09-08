@@ -64,6 +64,23 @@ AURIA_LOG_ENABLE=1
 - Semua write memakai guard `[ -e ]/[ -w ]`; tidak ada abort pada node hilang
 - Loop berjalan di background (`apply_tweaks &`) agar UI tetap responsif
 
+## WebUI
+
+Buka lewat tombol **WebUI** di KernelSU Manager (Next) atau aplikasi MMRL
+(untuk Magisk/KernelSU). Tampilan terinspirasi dashboard AZenith dan tema
+Project Raco.
+
+| Kontrol | Efek |
+|---------|------|
+| Profil (Balanced/Performance/Powersave) | set `AURIA_PROFILE` |
+| Toggle per fitur | set flag di `config.sh` |
+| `Terapkan` | tulis config & jalankan engine langsung |
+| `Simpan & Reboot` | tulis config lalu reboot |
+
+WebUI membaca/menulis `common/config.sh` dan bisa memanggil `common/cli.sh`
+untuk menerapkan tanpa reboot. Butuh KernelSU Manager untuk bridge shell
+(`window.kuband`); di browser biasa hanya tampil status (read-only).
+
 ## Struktur
 
 ```
@@ -73,10 +90,13 @@ auria_tweak/       → instalasi otomatis ke module tree
 ├── service.sh       boot service: reset counter, lalu jalankan engine
 ├── post-fs-data.sh  guard single-instance + anti-bootloop counter
 ├── system.prop      prop overlay (aman/persisten)
+├── webroot/
+│   └── index.html   WebUI (KernelSU/MMRL bridge)
 └── common/
     ├── config.sh    AURIA konfigurasi
     ├── helpers.sh   helper POSIX sh (write/lock/prop/sysctl/SoC/gov)
-    └── engine.sh    engine per-fitur (thermal→charging→display→render→io/vm)
+    ├── engine.sh    engine per-fitur (thermal→charging→display→render→io/vm)
+    └── cli.sh       apply-on-demand (WebUI "Terapkan")
 ```
 
 ## Build

@@ -4,4 +4,5 @@ module.prop text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
 *.md text eol=lf
+*.html text eol=lf
 * text=auto
