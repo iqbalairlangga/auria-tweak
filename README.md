@@ -10,7 +10,8 @@ diganti kapan saja **tanpa reboot**).
 
 | Fitur | Sumber | MediaTek | Snapdragon |
 |-------|--------|----------|------------|
-| Thermal policy (0/1/2) | AZenith | ✅ | ✅ |
+| Thermal policy (0/1/2) | AZenith + Kreapic | ✅ | ✅ |
+| Thermal kill: stop HAL/engine + pin prop | Kreapic | ✅ | ✅ |
 | MTK PPM policy parser | AZenith | ✅ | – |
 | MTK dvfsrc/bus tuning | AZenith | ✅ | – |
 | QC bus devfreq + kgsl | AZenith | – | ✅ |
@@ -48,7 +49,7 @@ langsung; flag lainnya berlaku pada reboot berikutnya:
 
 ```sh
 AURIA_PROFILE=balanced
-AURIA_THERMAL=1            # 0=stock 1=soften 2=kill
+AURIA_THERMAL=1            # 0=stock 1=soften 2=kill (stop thermal HAL)
 AURIA_CHARGING=1
 AURIA_CHARGE_CURRENT=2000000
 AURIA_DISPLAY=1
@@ -128,6 +129,9 @@ Auto-build & release via `.github/workflows/release.yml` setiap tag `v*`.
 
 ## Changelog
 
+- **v5.4** — Thermal kill diperkuat metode **Kreapic-Disable-Thermal**: stop
+  semua service thermal HAL/engine (18 service, dedup), kunci `init.svc.*=stopped`,
+  knob `msm_thermal core_control`, & restore service saat kembali ke Stock.
 - **v5.3** — semua fitur lanjutan (SF latency, FPSGO, WALT, kill logd, thermal kill)
   bisa di-ON/OFF langsung dari WebUI; OFF memulihkan ke bawaan tanpa reboot
   (thermal policy disnapshot untuk restore akurat); kartu "Fitur Lanjutan" khusus.
@@ -142,4 +146,5 @@ Auto-build & release via `.github/workflows/release.yml` setiap tag `v*`.
 
 - **AZenith** — Zexshia (Liliya2727) & ArchHaven, Apache-2.0
 - **Project Raco** — Kanagawa Yamada
+- **Kreapic-Disable-Thermal** — mahisataruna x AlgorithmIDN (teknik disable thermal universal)
 Video & teknik diadaptasi dan disederhanakan demi stabilitas.

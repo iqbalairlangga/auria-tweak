@@ -8,6 +8,94 @@ L() { a_log "$1"; }
 # ===================================================================
 # (1) THERMAL
 # ===================================================================
+# method: disable kernel/tzone knobs + stop thermal services. The
+# universal service list is merged from Kreapic-Disable-Thermal
+# (mahisataruna), adapted to a runtime-reversible engine.
+
+# Kernel/zone hard-off (used by modes 1 and 2).
+thermal_hardoff() {
+    local z
+    a_write "0" /sys/module/thermal/parameters/enabled
+    a_write "0" /sys/module/msm_thermal/parameters/enabled
+    a_write "0" /sys/module/msm_thermal/parameters/therm_limit_disable
+    a_write "0" /sys/module/msm_thermal/parameters/vdd_restriction_enabled
+    a_write "0" /sys/module/msm_thermal/core_control/enabled
+    a_write "0" /sys/kernel/msm_thermal/enabled
+    a_write "0" /proc/cpufreq/cpufreq_imax_enable
+    for z in /sys/class/thermal/thermal_zone*/mode; do a_write disabled "$z"; done
+}
+
+# Stop every known thermal HAL/engine service and pin the property so
+# init cannot respawn them (Kreapic list, deduplicated).
+thermal_stop_services() {
+    local svc
+    for svc in \
+        android.thermal-hal vendor.thermal-engine vendor.thermal_manager \
+        vendor.thermal-manager vendor.thermal-hal-2-0 vendor.thermal-hal-1-0 \
+        vendor-thermal-1-0 vendor.thermal-symlinks thermal_mnt_hal_service \
+        thermal thermal-engine thermald thermalloadalgod thermalservice \
+        sec-thermal-1-0 debug_pid.sec-thermal-1-0 thermal-hal mi_thermald
+    do
+        stop "$svc" 2>/dev/null
+        setprop "init.svc.$svc" stopped 2>/dev/null
+    done
+}
+
+# Re-enable services we pinned off (called from restore_disabled).
+thermal_start_services() {
+    local svc
+    for svc in \
+        android.thermal-hal vendor.thermal-engine vendor.thermal_manager \
+        vendor.thermal-manager vendor.thermal-hal-2-0 vendor.thermal-hal-1-0 \
+        vendor-thermal-1-0 vendor.thermal-symlinks thermal_mnt_hal_service \
+        thermal thermal-engine thermald thermalloadalgod thermalservice \
+        sec-thermal-1-0 debug_pid.sec-thermal-1-0 thermal-hal mi_thermald
+    do
+        start "$svc" 2>/dev/null
+    done
+}
+
+set_thermal() {
+    [ "$AURIA_THERMAL" = "0" ] && return 0
+    local z
+    case "$AURIA_SOC" in
+        mediatek)
+            case "$AURIA_THERMAL" in
+                1)
+                    thermal_hardoff
+                    L "MTK thermal: soften"
+                    ;;
+                2)
+                    thermal_hardoff
+                    # snapshot stock policy for reversible restore on re-enable
+                    : > /data/adb/auria_thermal_policy.bak
+                    for z in /sys/class/thermal/thermal_zone*; do
+                        if [ -e "$z/policy" ]; then
+                            echo "$z $(cat "$z/policy" 2>/dev/null)" >> /data/adb/auria_thermal_policy.bak
+                            a_write userspace "$z/policy"
+                        fi
+                    done
+                    thermal_stop_services
+                    L "MTK thermal: kill"
+                    ;;
+            esac
+            return 0
+            ;;
+        qualcomm)
+            case "$AURIA_THERMAL" in
+                1)
+                    thermal_hardoff
+                    L "QC thermal: soften"
+                    ;;
+                2)
+                    thermal_hardoff
+                    thermal_stop_services
+                    L "QC thermal: kill"
+                    ;;
+            esac
+            ;;
+    esac
+}
 
 # MTK: parse PPM policy_status and lift clamp policies like AZenith.
 mtk_ppm_policy() {
@@ -38,51 +126,6 @@ mtk_dvfsrc() {
         [ -e "$d/mtk-dvfsrc-devfreq/devfreq/mtk-dvfsrc-devfreq/governor" ] && \
             echo "$gov" > "$d/mtk-dvfsrc-devfreq/devfreq/mtk-dvfsrc-devfreq/governor" 2>/dev/null
     done
-}
-
-set_thermal() {
-    [ "$AURIA_THERMAL" = "0" ] && return 0
-    local z
-    case "$AURIA_SOC" in
-        mediatek)
-            case "$AURIA_THERMAL" in
-                1)
-                    a_write "0" /sys/module/thermal/parameters/enabled
-                    a_write "0" /proc/cpufreq/cpufreq_imax_enable
-                    L "MTK thermal: soften"
-                    ;;
-                2)
-                    a_write "0" /sys/module/thermal/parameters/enabled
-                    for z in /sys/class/thermal/thermal_zone*/mode; do a_write disabled "$z"; done
-                    # snapshot stock policy for reversible restore on re-enable
-                    : > /data/adb/auria_thermal_policy.bak
-                    for z in /sys/class/thermal/thermal_zone*; do
-                        if [ -e "$z/policy" ]; then
-                            echo "$z $(cat "$z/policy" 2>/dev/null)" >> /data/adb/auria_thermal_policy.bak
-                            a_write userspace "$z/policy"
-                        fi
-                    done
-                    L "MTK thermal: kill"
-                    ;;
-            esac
-            return 0
-            ;;
-        qualcomm)
-            case "$AURIA_THERMAL" in
-                1)
-                    a_write_any "0" /sys/module/msm_thermal/parameters/enabled \
-                        /sys/module/msm_thermal/parameters/therm_limit_disable
-                    L "QC thermal: soften"
-                    ;;
-                2)
-                    a_write_any "0" /sys/module/msm_thermal/parameters/enabled \
-                        /sys/module/msm_thermal/parameters/vdd_restriction_enabled
-                    for z in /sys/class/thermal/thermal_zone*/mode; do a_write disabled "$z"; done
-                    L "QC thermal: kill"
-                    ;;
-            esac
-            ;;
-    esac
 }
 
 # ===================================================================
@@ -303,6 +346,10 @@ restore_disabled() {
         rm -f /data/adb/auria_thermal_policy.bak
         a_write_any "1" /sys/module/msm_thermal/parameters/enabled \
             /sys/module/msm_thermal/parameters/therm_limit_disable
+        a_write "1" /sys/module/msm_thermal/core_control/enabled
+        a_write "1" /sys/kernel/msm_thermal/enabled
+        # restart thermal HAL/engine services that kill-mode pinned off
+        thermal_start_services
         L "thermal: restored to stock"
     fi
     # fpsgo / GED back to stock
