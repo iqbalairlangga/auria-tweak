@@ -11,7 +11,7 @@
 
 SRC=${0%/*}
 DST=/data/adb/modules/auria_tweak
-AURIA_VER="5.6"
+AURIA_VER="5.7"
 
 ui_print() { echo "$1"; }
 
@@ -27,10 +27,30 @@ ui_print() { echo "$1"; }
     exit 0
 }
 
+# --- root manager check (Magisk / KernelSU / APatch only) ---
+rmgr=other
+{
+    [ "$KSU" = "true" ] || [ -n "$KSU_VER_CODE" ] || [ -d /data/adb/ksu ]
+} && rmgr=ksu
+{
+    [ "$APATCH" = "true" ] || [ -n "$APATCH_VER_CODE" ] || [ -d /data/adb/apd ] || [ -d /data/adb/APatch ]
+} && rmgr=apatch
+{
+    [ -n "$MAGISK_VER_CODE" ] || [ -d /data/adb/magisk ]
+} && rmgr=magisk
+if [ "$rmgr" = "other" ]; then
+    ui_print "!"
+    ui_print "! Tidak ditemukan Magisk / KernelSU / APatch."
+    ui_print "! Auria Tweak hanya mendukung ketiga boot manager ini."
+    ui_print "!"
+    exit 1
+fi
+
 ui_print "=============================="
 ui_print "   Auria Tweak v$AURIA_VER"
 ui_print "   MediaTek Helio / Snapdragon"
 ui_print "=============================="
+ui_print "  Root manager: $rmgr (supported)"
 
 # --- backup user config before refresh ---
 if [ -f "$DST/common/config.sh" ]; then

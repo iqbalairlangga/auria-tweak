@@ -2,7 +2,7 @@
 # Auria Tweak - shared helpers (POSIX sh)
 
 AURIA_LOG="/data/adb/auria_tweak.log"
-AURIA_VER="5.6"
+AURIA_VER="5.7"
 
 a_log() {
     [ "$AURIA_LOG_ENABLE" = "1" ] || return 0
@@ -86,6 +86,19 @@ detect_soc() {
         [ -d /sys/kernel/ged/hal ] && AURIA_SOC=mediatek
         [ -d /sys/class/kgsl/kgsl-3d0/devfreq ] && AURIA_SOC=qualcomm
     }
+}
+
+# Boot/root manager detection -> AURIA_ROOT (magisk|ksu|apatch|other).
+# The module is intended for Magisk, KernelSU, and APatch only.
+detect_root_mgr() {
+    AURIA_ROOT=other
+    if [ "$KSU" = "true" ] || [ -n "$KSU_VER_CODE" ] || [ -d /data/adb/ksu ]; then
+        AURIA_ROOT=ksu
+    elif [ "$APATCH" = "true" ] || [ -n "$APATCH_VER_CODE" ] || [ -d /data/adb/apd ] || [ -d /data/adb/APatch ]; then
+        AURIA_ROOT=apatch
+    elif [ -n "$MAGISK_VER_CODE" ] || [ -d /data/adb/magisk ]; then
+        AURIA_ROOT=magisk
+    fi
 }
 
 # Pick $1 as governor when available, otherwise fall through candidates.

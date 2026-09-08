@@ -6,12 +6,24 @@
 MODDIR=${0%/*}
 . "$MODDIR/common/helpers.sh"
 
-[ "$(id -u 2>/dev/null)" = "0" ] || { echo "Error: run via root manager"; exit 1; }
-
 ui_print "=============================="
 ui_print "   Auria Tweak v$AURIA_VER"
 ui_print "   MediaTek Helio / Snapdragon"
 ui_print "=============================="
+
+detect_root_mgr
+case "$AURIA_ROOT" in
+    magisk|ksu|apatch)
+        ui_print "  Root manager: $AURIA_ROOT (supported)"
+        ;;
+    *)
+        ui_print "!"
+        ui_print "! Root manager tidak dikenali."
+        ui_print "! Auria Tweak hanya mendukung Magisk / KernelSU / APatch."
+        ui_print "!"
+        exit 1
+        ;;
+esac
 
 detect_soc
 

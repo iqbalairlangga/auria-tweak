@@ -3,8 +3,11 @@
 **High-stability tuning engine** untuk MediaTek Helio (G10–G200) dan Snapdragon (semua series).
 Ringan, efisien, dan muat dalam 10MB — file ZIP hasil build hanya ~14KB.
 
-FLASH via Magisk / KernelSU / APatch, lalu **reboot** (setelah itu profil bisa
+FLASH via **Magisk / KernelSU / APatch**, lalu **reboot** (setelah itu profil bisa
 diganti kapan saja **tanpa reboot**).
+
+> Hanya mendukung ketiga boot manager ini. Installer memverifikasi root manager;
+> jika tidak terdeteksi Magisk/KernelSU/APatch, pemasangan akan dibatalkan.
 
 ## Fitur (gabungan dari AZenith + Project Raco)
 
@@ -154,6 +157,8 @@ Auto-build & release via `.github/workflows/release.yml` setiap tag `v*`.
 
 ## Changelog
 
+- **v5.7** — kunci modul ke **Magisk / KernelSU / APatch** saja: installer
+  (customize.sh + install.sh) memverifikasi root manager, tolak bila lain.
 - **v5.6** — tambah `install.sh`: installer mandiri untuk terminal/ADB tanpa
   manager; backup `config.sh` user saat update dan pertahankan pengaturannya.
 - **v5.5** — tambah `uninstall.sh`: restore thermal/logger ke stock + bersihkan

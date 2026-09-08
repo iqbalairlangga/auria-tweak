@@ -1,6 +1,6 @@
 id=auria_tweak
 name=Auria Tweak
-version=v5.6
-versionCode=56
+version=v5.7
+versionCode=57
 author=AuriaDev
 description=High-stability tuning engine for MediaTek Helio (G10-G200) & Snapdragon. Merged from AZenith + Project Raco with WebUI. Thermal, charging, display/SF, render, IO/VM. Anti-bootloop. Under 10MB.
