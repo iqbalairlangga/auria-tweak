@@ -157,11 +157,6 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
         <div class="d">Zeta props + color matrix</div></div>
       <button class="switch"></button>
     </div>
-    <div class="toggle" data-key="AURIA_SF_LATENCY">
-      <div class="info"><div class="t">SF latency</div>
-        <div class="d">Phase-offset lanjutan <span class="tag">risiko</span></div></div>
-      <button class="switch"></button>
-    </div>
     <label style="font-size:11px;color:var(--muted);margin-top:10px;display:block">
       Refresh rate target</label>
     <select id="AURIA_REFRESH">
@@ -197,6 +192,18 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
         <div class="d">Parser policy_status <span class="tag live">MTK</span></div></div>
       <button class="switch"></button>
     </div>
+  </div>
+
+  <div class="card" style="border-color:var(--error)">
+    <h2 style="color:var(--error)">Fitur Lanjutan (risiko)</h2>
+    <p style="font-size:11px;color:var(--muted);margin:-6px 0 10px">Default
+      <b>OFF</b>. ON = diterapkan saat "Terapkan Sekarang"; OFF = dipulihkan ke
+      bawaan (tanpa reboot). Aktifkan hanya bila paham risikonya.</p>
+    <div class="toggle" data-key="AURIA_SF_LATENCY">
+      <div class="info"><div class="t">SF latency</div>
+        <div class="d">Phase-offset lanjutan <span class="tag">risiko</span></div></div>
+      <button class="switch"></button>
+    </div>
     <div class="toggle" data-key="AURIA_MTK_FPSGO">
       <div class="info"><div class="t">MTK FPSGO / GED</div>
         <div class="d">Boost gaming MTK <span class="tag">risiko</span></div></div>
@@ -205,6 +212,11 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
     <div class="toggle" data-key="AURIA_WALT">
       <div class="info"><div class="t">WALT governor</div>
         <div class="d">Tuning walt MTK <span class="tag">risiko</span></div></div>
+      <button class="switch"></button>
+    </div>
+    <div class="toggle" data-key="AURIA_KILL_LOGD">
+      <div class="info"><div class="t">Kill logger</div>
+        <div class="d">logd/statsd/traced <span class="tag">risiko</span></div></div>
       <button class="switch"></button>
     </div>
   </div>
@@ -219,11 +231,6 @@ code{background:var(--surface2);padding:1px 6px;border-radius:6px;font-size:11px
     <div class="toggle" data-key="AURIA_VM">
       <div class="info"><div class="t">VM balance</div>
         <div class="d">Swappiness, dirty ratio, VFS</div></div>
-      <button class="switch"></button>
-    </div>
-    <div class="toggle" data-key="AURIA_KILL_LOGD">
-      <div class="info"><div class="t">Kill logger</div>
-        <div class="d">logd/statsd/traced <span class="tag">risiko</span></div></div>
       <button class="switch"></button>
     </div>
     <div class="toggle" data-key="AURIA_LOG_ENABLE">

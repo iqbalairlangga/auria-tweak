@@ -42,6 +42,7 @@ mtk_dvfsrc() {
 
 set_thermal() {
     [ "$AURIA_THERMAL" = "0" ] && return 0
+    local z
     case "$AURIA_SOC" in
         mediatek)
             case "$AURIA_THERMAL" in
@@ -53,10 +54,18 @@ set_thermal() {
                 2)
                     a_write "0" /sys/module/thermal/parameters/enabled
                     for z in /sys/class/thermal/thermal_zone*/mode; do a_write disabled "$z"; done
-                    for z in /sys/class/thermal/thermal_zone*/policy; do a_write userspace "$z"; done
+                    # snapshot stock policy for reversible restore on re-enable
+                    : > /data/adb/auria_thermal_policy.bak
+                    for z in /sys/class/thermal/thermal_zone*; do
+                        if [ -e "$z/policy" ]; then
+                            echo "$z $(cat "$z/policy" 2>/dev/null)" >> /data/adb/auria_thermal_policy.bak
+                            a_write userspace "$z/policy"
+                        fi
+                    done
                     L "MTK thermal: kill"
                     ;;
             esac
+            return 0
             ;;
         qualcomm)
             case "$AURIA_THERMAL" in
@@ -273,6 +282,55 @@ set_misc() {
 }
 
 # ===================================================================
+# (6) RESTORE (so off-toggles are reversible at runtime)
+# ===================================================================
+
+# Revert previously-applied advanced settings when their flag is OFF.
+# Mirrors each enable-path so toggling off via WebUI/CLI really restores,
+# not merely skips (no reboot needed for these).
+restore_disabled() {
+    # thermal back to stock when mode=0
+    if [ "$AURIA_THERMAL" = "0" ]; then
+        a_write "1" /sys/module/thermal/parameters/enabled
+        a_write "1" /proc/cpufreq/cpufreq_imax_enable
+        for z in /sys/class/thermal/thermal_zone*/mode; do a_write enabled "$z"; done
+        # restore MTK zone policies snapshotted before userspace override
+        if [ -f /data/adb/auria_thermal_policy.bak ]; then
+            while read -r zone policy; do
+                [ -n "$zone" ] && [ -n "$policy" ] && a_write "$policy" "$zone/policy"
+            done < /data/adb/auria_thermal_policy.bak
+        fi
+        rm -f /data/adb/auria_thermal_policy.bak
+        a_write_any "1" /sys/module/msm_thermal/parameters/enabled \
+            /sys/module/msm_thermal/parameters/therm_limit_disable
+        L "thermal: restored to stock"
+    fi
+    # fpsgo / GED back to stock
+    if [ "$AURIA_MTK_FPSGO" = "0" ]; then
+        a_write "0" /sys/module/ged/parameters/gx_game_mode
+        a_write "0" /sys/module/ged/parameters/gx_force_cpu_boost
+        a_write "0" /sys/kernel/ged/hal/gpu_boost_level
+        L "fpsgo: restored"
+    fi
+    # SF latency props removed (falls back to dynamic defaults)
+    if [ "$AURIA_SF_LATENCY" = "0" ]; then
+        for prop in debug.sf.enable_advanced_sf_phase_offset \
+            debug.sf.early.sf.duration debug.sf.early.app.duration \
+            debug.sf.late.sf.duration debug.sf.late.app.duration; do
+            resetprop --delete "$prop" 2>/dev/null
+        done
+        L "sf latency: restored"
+    fi
+    # loggers back up
+    if [ "$AURIA_KILL_LOGD" = "0" ]; then
+        for logger in logd traced statsd subsystem_ramdump; do
+            start "$logger" 2>/dev/null
+        done
+        L "loggers: restarted"
+    fi
+}
+
+# ===================================================================
 # RUN
 # ===================================================================
 
@@ -293,5 +351,7 @@ apply_tweaks() {
     set_io
     set_vm
     set_misc
+    # revert settings for flags turned OFF (live, no reboot)
+    restore_disabled
     L "done"
 }

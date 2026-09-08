@@ -83,6 +83,8 @@ Project Raco.
 |---------|------|
 | Ketuk profil (Balanced/Performance/Powersave) | ganti `AURIA_PROFILE` + **terapkan langsung, tanpa reboot** |
 | Toggle per fitur | set flag di `config.sh` |
+| Fitur Lanjutan (SF latency, FPSGO, WALT, Kill logd) | kartu khusus bertanda risiko; ON = terapkan, OFF = **dipulihkan ke bawaan tanpa reboot** |
+| Thermal (Stock/Soft/Kill) | segment control; Kill = matikan thermal engine (bisa kembali ke Stock) |
 | `Terapkan Sekarang` | tulis config & jalankan engine langsung dengan profil aktif |
 | `Simpan & Reboot` | tulis config lalu reboot |
 
@@ -126,6 +128,9 @@ Auto-build & release via `.github/workflows/release.yml` setiap tag `v*`.
 
 ## Changelog
 
+- **v5.3** — semua fitur lanjutan (SF latency, FPSGO, WALT, kill logd, thermal kill)
+  bisa di-ON/OFF langsung dari WebUI; OFF memulihkan ke bawaan tanpa reboot
+  (thermal policy disnapshot untuk restore akurat); kartu "Fitur Lanjutan" khusus.
 - **v5.2** — ganti profil tanpa reboot (WebUI / `cli.sh`); governor CPU mengikuti
   profil aktif; fallback governor profile-aware; tombol "Terapkan Sekarang".
 - **v5.1** — WebUI baru (KernelSU/MMRL), gaya AZenith + Raco; CLI apply; deteksi SoC.
