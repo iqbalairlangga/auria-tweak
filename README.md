@@ -1,9 +1,10 @@
 # Auria Tweak
 
 **High-stability tuning engine** untuk MediaTek Helio (G10–G200) dan Snapdragon (semua series).
-Ringan, efisien, dan muat dalam 10MB — file ZIP hasil build hanya ~8KB.
+Ringan, efisien, dan muat dalam 10MB — file ZIP hasil build hanya ~14KB.
 
-FLASH via Magisk / KernelSU / APatch, lalu **reboot**.
+FLASH via Magisk / KernelSU / APatch, lalu **reboot** (setelah itu profil bisa
+diganti kapan saja **tanpa reboot**).
 
 ## Fitur (gabungan dari AZenith + Project Raco)
 
@@ -31,11 +32,19 @@ default **OFF** demi stabilitas; aktifkan di config bila paham risikonya.
 ## Profil
 
 `balanced` (default) · `performance` · `powersave`
-Ubah di `AURIA_PROFILE` pada config, lalu reboot.
+Ubah di `AURIA_PROFILE` pada config, atau langsung dari WebUI / CLI — profil
+berlaku **tanpa reboot** (governor CPU + policy MTK/PPM/dvfsrc di-switch live).
+
+```bash
+# ganti profil dari terminal (berlaku langsung)
+sh /data/adb/modules/auria_tweak/common/cli.sh performance
+# pilihan: balanced | performance | powersave
+```
 
 ## Konfigurasi
 
-Edit `/data/adb/modules/auria_tweak/common/config.sh`, lalu reboot:
+Edit `/data/adb/modules/auria_tweak/common/config.sh`. Profil berlaku
+langsung; flag lainnya berlaku pada reboot berikutnya:
 
 ```sh
 AURIA_PROFILE=balanced
@@ -79,7 +88,7 @@ Project Raco.
 
 Profil diganti tanpa reboot: klik kartu profil → WebUI menulis `AURIA_PROFILE`
 ke `config.sh` lalu memanggil `common/cli.sh <profil>`; engine mengubah governor
-CPU serta policy MTK/PPM/dvfsrc sesuai profil secara perangkat-runtime.
+CPU serta policy MTK/PPM/dvfsrc sesuai profil secara runtime (tanpa restart).
 
 WebUI membaca/menulis `common/config.sh` dan bisa memanggil `common/cli.sh`
 untuk menerapkan tanpa reboot. Butuh KernelSU Manager untuk bridge shell
@@ -100,7 +109,7 @@ auria_tweak/       → instalasi otomatis ke module tree
     ├── config.sh    AURIA konfigurasi
     ├── helpers.sh   helper POSIX sh (write/lock/prop/sysctl/SoC/gov)
     ├── engine.sh    engine per-fitur (thermal→charging→display→render→io/vm)
-    └── cli.sh       apply-on-demand (WebUI "Terapkan")
+    └── cli.sh       ganti profil & apply tanpa reboot (WebUI/terminal)
 ```
 
 ## Build
@@ -114,6 +123,15 @@ Auto-build & release via `.github/workflows/release.yml` setiap tag `v*`.
 ## Log
 
 `/data/adb/auria_tweak.log` (aktif jika `AURIA_LOG_ENABLE=1`).
+
+## Changelog
+
+- **v5.2** — ganti profil tanpa reboot (WebUI / `cli.sh`); governor CPU mengikuti
+  profil aktif; fallback governor profile-aware; tombol "Terapkan Sekarang".
+- **v5.1** — WebUI baru (KernelSU/MMRL), gaya AZenith + Raco; CLI apply; deteksi SoC.
+- **v5.0** — engine modular merge AZenith + Raco (establish baseline).
+- **v4.0** — engine bersih & modular, ≤10MB.
+- **v3.7** — rilis stabil awal.
 
 ## Kredit
 
