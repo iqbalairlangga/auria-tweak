@@ -1,27 +1,40 @@
 #!/system/bin/sh
-# Auria Tweak - installer (sourced by META-INF update-binary or run standalone)
-# SoC detection + anti-bootloop baseline.
+# Auria Tweak - installer
+# Contexts:
+#   1. Magisk: sourced by META-INF/com/google/android/update-binary (MODPATH set)
+#   2. KernelSU / ResukiSU / APatch native: executed from module dir (no MODPATH)
+#   3. Standalone manual: sh /path/to/customize.sh
 
-# ui_print is provided by Magisk's util_functions.sh when sourced by update-binary
-# TMPDIR is set by update-binary; MODPATH is set by update-binary
+# ui_print is provided by Magisk's util_functions.sh; fallback for everyone else.
+command -v ui_print >/dev/null 2>&1 || ui_print() { echo "$1"; }
 
-# Detect root manager first (needs helpers.sh)
-# When sourced by update-binary, helpers.sh is in TMPDIR/common/ (extracted from zip)
-# When run standalone, helpers.sh is in same dir as this script
-HELPER_DIR="${TMPDIR:-${0%/*}}"
-# Check common/ subdirectory first (update-binary extraction), then current dir
-if [ -f "$HELPER_DIR/common/helpers.sh" ]; then
-    . "$HELPER_DIR/common/helpers.sh"
-elif [ -f "$HELPER_DIR/helpers.sh" ]; then
-    . "$HELPER_DIR/helpers.sh"
-else
-    echo "Error: helpers.sh not found"
-    exit 1
+# --- locate module dir -----------------------------------------------------
+# Magisk sets MODPATH. KernelSU/ResukiSU run customize.sh from the module dir.
+if [ -z "$MODPATH" ]; then
+    if [ -f "$PWD/module.prop" ]; then
+        MODPATH=$PWD
+    else
+        MODPATH=${0%/*}
+    fi
 fi
 
-# Use MODPATH if set by update-binary, otherwise use MODDIR for standalone
-MODPATH=${MODPATH:-${0%/*}}
+# --- locate helpers.sh -----------------------------------------------------
+# Magisk: TMPDIR/common/helpers.sh (after update-binary extracts zip)
+# KSU/ResukiSU native: module dir/common/helpers.sh
+HELPER_DIR=""
+for c in "$MODPATH/common" "${TMPDIR}/common" "${0%/*}/common" "$PWD/common"; do
+    if [ -f "$c/helpers.sh" ]; then
+        HELPER_DIR="$c"
+        break
+    fi
+done
+if [ -z "$HELPER_DIR" ]; then
+    ui_print "Error: helpers.sh tidak ditemukan."
+    exit 1
+fi
+. "$HELPER_DIR/helpers.sh"
 
+# --- root manager lock (Magisk / KernelSU / APatch only) -------------------
 detect_root_mgr
 case "$AURIA_ROOT" in
     magisk|ksu|apatch)
@@ -43,7 +56,7 @@ echo "BOOTCOUNT=0" > "$MODPATH/count.sh"
 
 ui_print "  SoC family : $AURIA_SOC"
 ui_print "  Platform   : $(getprop ro.board.platform 2>/dev/null)"
-ui_print "  Profile    : $(grep '^AURIA_PROFILE' "$MODPATH/common/config.sh" | cut -d= -f2)"
+ui_print "  Profile    : $(grep '^AURIA_PROFILE' "$HELPER_DIR/config.sh" | cut -d= -f2)"
 ui_print ""
 ui_print "  Features:"
 ui_print "   - Thermal soften (mode 1)"
@@ -56,5 +69,3 @@ ui_print ""
 ui_print "  Config: /data/adb/modules/auria_tweak/common/config.sh"
 ui_print "  Reboot after install to apply."
 ui_print "  Uninstall: kelola via manager (restore otomatis ke stock)."
-
-exit 0

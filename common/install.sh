@@ -1,27 +1,30 @@
 #!/system/bin/sh
 # Auria Tweak - standalone installer (terminal/ADB/manual)
-# Installs this module tree into /data/adb/modules/auria_tweak
-# usable by Magisk, KernelSU, and MMRL alike.
+# Installs this module tree into /data/adb/modules/auria_tweak.
+# Usable by Magisk, KernelSU, and mmrl alike.
 #
 # Usage:
-#   (as root) sh /path/to/auria_tweak/install.sh
-#   adb shell "su -c 'sh /sdcard/Download/auria_tweak/install.sh'"
+#   (as root) sh /path/to/auria_tweak/common/install.sh
+#   adb shell "su -c 'sh /sdcard/Download/auria_tweak/common/install.sh'"
 #
 # Existing config.sh is PRESERVED on update; fresh modules get defaults.
 
-SRC=${0%/*}
-DST=/data/adb/modules/auria_tweak
-AURIA_VER="5.7"
+ARCH=$(getprop ro.dalvik.vm.isa.arm)
+AURIA_VER="6.1.3"
 
 ui_print() { echo "$1"; }
 
+# The module root is the parent of this script's directory (we live in common/).
+MOD_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+DST=/data/adb/modules/auria_tweak
+
 # --- sanity ---
 [ "$(id -u 2>/dev/null)" = "0" ] || { ui_print "Error: jalankan sebagai root."; exit 1; }
-[ -d "$SRC" ] || { ui_print "Error: tidak dapat menemukan direktori modul."; exit 1; }
+[ -f "$MOD_ROOT/module.prop" ] || { ui_print "Error: tidak dapat menemukan direktori modul."; exit 1; }
 [ -d "$DST" ] || mkdir -p "$DST" 2>/dev/null || { ui_print "Error: /data/adb/modules tidak writable."; exit 1; }
 
 # --- guard: jangan self-copy dari dalam destination ---
-[ "$SRC" = "$DST" ] && {
+[ "$MOD_ROOT" = "$DST" ] && {
     ui_print "Auria Tweak v$AURIA_VER sudah terpasang."
     ui_print "Jalankan 'sh $0' dari direktori lain untuk update."
     exit 0
@@ -59,7 +62,7 @@ if [ -f "$DST/common/config.sh" ]; then
 fi
 
 # --- install module tree ---
-cp -af "$SRC/." "$DST/" 2>/dev/null || { ui_print "Error: gagal menyalin modul."; exit 1; }
+cp -af "$MOD_ROOT/." "$DST/" 2>/dev/null || { ui_print "Error: gagal menyalin modul."; exit 1; }
 chmod -R 0644 "$DST/." 2>/dev/null
 chmod 0755 "$DST" "$DST/common" "$DST/webroot" 2>/dev/null
 for f in "$DST"/*.sh "$DST"/*.prop "$DST"/common/*.sh; do

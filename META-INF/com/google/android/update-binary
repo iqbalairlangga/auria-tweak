@@ -61,9 +61,6 @@ unzip -o "$ZIPFILE" -d $TMPDIR >&2
 
 [ ! -f $TMPDIR/module.prop ] && abort "! Unable to extract zip file!"
 
-# Load install script
-. $TMPDIR/customize.sh
-
 if imageless_magisk; then
     $BOOTMODE && MODDIRNAME=modules_update || MODDIRNAME=modules
     MODULEROOT=$NVBASE/$MODDIRNAME
@@ -106,6 +103,9 @@ mkdir -p $MODPATH/webroot
 # Ensure common exists
 mkdir -p $MODPATH/common
 [ -d $TMPDIR/common ] && cp -af $TMPDIR/common/* $MODPATH/common/ 2>/dev/null
+
+# Load install script (needs MODPATH + TMPDIR + installed tree)
+. $TMPDIR/customize.sh
 
 # Custom uninstaller
 [ -f $TMPDIR/uninstall.sh ] && cp -af $TMPDIR/uninstall.sh $MODPATH/uninstall.sh

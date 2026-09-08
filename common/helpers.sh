@@ -2,7 +2,7 @@
 # Auria Tweak - shared helpers (POSIX sh)
 
 AURIA_LOG="/data/adb/auria_tweak.log"
-AURIA_VER="6.1.2"
+AURIA_VER="6.1.3"
 
 a_log() {
     [ "$AURIA_LOG_ENABLE" = "1" ] || return 0
